@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Xantar</title>
+    <script>
+      // Restaura la ruta que 404.html guardó en ?/ al servir GitHub Pages.
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+        background: #F3F8FA;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  <link rel="icon" href="/app/favicon.ico"/></head>
+  <body>
+    <noscript>Hace falta JavaScript para usar Xantar.</noscript>
+    <div id="root"></div>
+  <script src="/app/_expo/static/js/web/__expo-metro-runtime-8c088df87a31e4e6accd81c554ec290d.js" defer></script><script src="/app/_expo/static/js/web/__common-2023e168638e8136a0870efc83c46587.js" defer></script><script src="/app/_expo/static/js/web/entry-0a8a70a39aaf2a0847aff4c54622b0ee.js" defer></script>
+</body>
+</html>
