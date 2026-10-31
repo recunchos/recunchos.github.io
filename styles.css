@@ -1,4 +1,4 @@
-/* Xantar — landing, paleta Rías Baixas soleadas */
+/* Recunchos — landing */
 @font-face{
   font-family:"Cinzel";
   src:url("fonts/cinzel.woff2") format("woff2");
@@ -15,9 +15,8 @@
   --muted:#4A6075;
   --primary:#1F5F8B;
   --primary-ink:#FFFFFF;
-  --accent:#E07A2E;
+  --accent:#B56A31;
   --success:#2E7D5B;
-  --tile:#000000;
   --tint:#E8F2F8;
   --serif:"Cinzel","Cormorant SC","Trajan Pro",Georgia,"Times New Roman",serif;
   --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
@@ -50,20 +49,13 @@ p{margin:0}
 }
 .skip:focus{left:12px}
 
-/* black logo on a dark rounded tile */
-.logo-tile{
-  display:inline-block;background:var(--tile);line-height:0;
-  overflow:hidden;flex-shrink:0;
-}
-.logo-tile--hero{
-  border-radius:36px;
+.brand__logo{height:40px;width:auto}
+.footer__logo{height:52px;width:auto}
+.hero__logo{
+  width:min(56vw,240px);height:auto;border-radius:28px;
   box-shadow:0 18px 44px rgba(19,41,61,.16);
 }
-.logo-tile--hero .hero__logo{width:min(70vw,320px);height:auto}
-.logo-tile--nav{border-radius:8px;width:32px;height:32px}
-.logo-tile--nav img{width:32px;height:32px}
-.logo-tile--sm{border-radius:28px;width:120px}
-.logo-tile--sm img{width:120px;height:auto}
+.notfound__logo{width:120px;height:auto;border-radius:24px}
 
 /* top bar */
 .topbar{
@@ -73,8 +65,7 @@ p{margin:0}
   border-bottom:1px solid var(--line);
 }
 .topbar__in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);flex-shrink:0}
-.brand__name{font-family:var(--serif);font-weight:700;letter-spacing:.12em;font-size:1.05rem;color:var(--primary)}
+.brand{display:flex;align-items:center;text-decoration:none;color:var(--text);flex-shrink:0}
 .topbar nav ul{display:flex;gap:2px;list-style:none;margin:0;padding:0}
 .topbar nav a{
   display:block;padding:8px 8px;color:var(--text);text-decoration:none;
@@ -89,7 +80,15 @@ p{margin:0}
   text-decoration:none;font-weight:700;font-size:.9rem;white-space:nowrap;
 }
 .login-link:hover{color:var(--primary-ink);background:#17496C}
-@media (max-width:479px){.brand span{display:none}}
+@media (max-width:719px){
+  .brand__logo{height:32px}
+  .topbar__in{flex-wrap:wrap;row-gap:2px;padding-top:8px;padding-bottom:8px}
+  .topbar__end{display:contents}
+  .brand{order:1}
+  .login-link{order:2;margin-left:auto}
+  .topbar nav{order:3;flex:1 0 100%}
+  .topbar nav ul{justify-content:center;flex-wrap:wrap}
+}
 @media (min-width:640px){.topbar nav a{font-size:.9rem;padding:8px 12px}}
 
 /* hero */
@@ -246,7 +245,6 @@ p{margin:0}
 /* footer */
 .footer{border-top:1px solid var(--line);padding:36px 0 44px;font-size:.95rem;color:var(--muted);background:var(--bg)}
 .footer__in{display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
-.footer__brand{font-family:var(--serif);color:var(--primary);font-weight:700;letter-spacing:.08em;font-size:1.15rem}
 .footer__contact{display:flex;flex-direction:column;align-items:center;gap:2px}
 .footer__contact-label{
   margin:0;color:var(--text);font-weight:700;
