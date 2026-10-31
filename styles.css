@@ -100,9 +100,13 @@ p{margin:0}
     var(--bg);
 }
 .hero__in{display:flex;flex-direction:column;align-items:center}
+.hero__formerly{
+  margin:16px 0 0;color:var(--muted);
+  font:600 .8rem/1.3 var(--sans);letter-spacing:.04em;
+}
 .hero h1{
   font-size:clamp(1.7rem,6.2vw,3.05rem);color:var(--text);
-  max-width:16em;margin-top:22px;
+  max-width:16em;margin-top:14px;
 }
 .hero__sub{
   margin-top:18px;max-width:40rem;color:var(--text);
