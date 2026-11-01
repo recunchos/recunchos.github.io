@@ -51,11 +51,22 @@
     <input id="municipality" name="municipality" autocomplete="address-level2" required>
     <p class="version">VERSIÓN v2.1.4 (Recunchos) — APROBADA por el titular el 31/10/2026</p>
     <p class="hint">Entrada en vigor: v2, v2.1, v2.1.1, v2.1.2, v2.1.3 y v2.1.4 el 31 de octubre de 2026. Última actualización: 31 de octubre de 2026.</p>
-    <label class="check"><input id="age" name="age" type="checkbox"> <span><strong>Confirmo que tengo 18 años o más.</strong> Recunchos trata de establecimientos donde se vende vino y solo está disponible para mayores de 18 años. No se aceptan menores: si detectamos que una cuenta pertenece a una persona menor de 18 años, la eliminaremos junto con sus datos. (Condiciones de uso, apartado 4.2; Política de privacidad, apartado 2.11.)</span></label>
-    <label class="check"><input id="terms" name="terms" type="checkbox"> <span><strong>He leído y acepto las Condiciones de uso.</strong> <a href="https://fwfwfbtzarmwalfaxelh.supabase.co/functions/v1/legal/terminos" rel="noopener">Enlace a las Condiciones de uso.</a></span></label>
-    <label class="check"><input id="privacy" name="privacy" type="checkbox"> <span><strong>He leído la Política de privacidad.</strong> Marcar esta casilla solo confirma que has recibido la información; no es un consentimiento. <a href="https://fwfwfbtzarmwalfaxelh.supabase.co/functions/v1/legal/privacidad" rel="noopener">Enlace a la Política de privacidad.</a></span></label>
+    <label class="check"><input id="age" name="age" type="checkbox" required> <span>Confirmo que tengo 18 años o más.</span></label>
+    <label class="check"><input id="terms" name="terms" type="checkbox" required> <span>He leído y acepto las <a href="/terminos.html">Condiciones de uso</a>.</span></label>
+    <label class="check"><input id="privacy" name="privacy" type="checkbox" required> <span>He leído la <a href="/privacidad.html">Política de privacidad</a>.</span></label>
     <p class="err" id="error" hidden></p>
     <p class="ok" id="ok" hidden></p>
+    <section class="datos" aria-labelledby="datos-titulo">
+      <h2 id="datos-titulo">Información básica sobre protección de datos</h2>
+      <ul>
+        <li><strong>Responsable:</strong> Luis Álvarez Tejero (Recunchos).</li>
+        <li><strong>Finalidad:</strong> crear y gestionar tu cuenta y prestarte las funciones de la app.</li>
+        <li><strong>Base jurídica:</strong> ejecución del contrato (Condiciones de uso).</li>
+        <li><strong>Destinatarios:</strong> no cedemos tus datos a terceros salvo obligación legal. Los proveedores que nos prestan servicios los tratan por cuenta de Recunchos, y algunos pueden tratarlos fuera del Espacio Económico Europeo con garantías adecuadas.</li>
+        <li><strong>Derechos:</strong> acceso, rectificación, supresión, oposición, limitación y portabilidad, en <a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a>. Puedes reclamar ante la AEPD (<a href="https://www.aepd.es">www.aepd.es</a>).</li>
+        <li><strong>Más información:</strong> <a href="/privacidad.html">Política de privacidad</a>.</li>
+      </ul>
+    </section>
     <button type="submit" id="submit" disabled>Crear cuenta</button>
     <div class="links">
       <a id="entrar" href="/entrar/">Ya tengo cuenta</a>
@@ -67,7 +78,7 @@
     <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
     <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
     <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
-    <p class="footer__legal"><a href="/legal.html">Legal</a></p>
+    <p class="footer__legal"><a href="/legal.html">Legal</a> · <a href="/eliminar-cuenta.html">Eliminar cuenta</a></p>
   </div>
 </footer>
 <script src="/sesion.js"></script>
