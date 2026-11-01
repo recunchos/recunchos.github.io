@@ -144,19 +144,48 @@ p{margin:0}
 }
 
 /* feature cards */
-.cards{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:16px;grid-template-columns:1fr}
+.cards{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:16px;grid-template-columns:1fr;align-items:start}
 @media (min-width:640px){.cards{grid-template-columns:repeat(2,1fr)}}
 @media (min-width:1000px){.cards{grid-template-columns:repeat(6,1fr)}.cards>li{grid-column:span 2}.cards>li:nth-child(4){grid-column:2 / span 2}}
-.cards>li{display:flex;min-width:0}
+.cards>li{display:flex;min-width:0;align-items:flex-start}
 .card{
-  display:flex;flex-direction:column;flex:1;width:100%;
+  display:flex;flex-direction:column;flex:1 1 auto;width:100%;align-self:flex-start;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:24px 22px;color:inherit;text-decoration:none;
   box-shadow:0 8px 24px rgba(19,41,61,.05);
 }
 .card:hover{border-color:var(--primary);color:inherit}
+.card summary{
+  display:flex;flex-direction:column;position:relative;
+  padding-right:36px;cursor:pointer;list-style:none;
+  font:inherit;color:inherit;
+}
+.card summary::-webkit-details-marker{display:none}
+.card summary:focus-visible{outline:2px solid var(--primary);outline-offset:4px;border-radius:8px}
 .card h3{font-size:1.08rem;color:var(--text);margin:14px 0 8px;letter-spacing:.03em}
 .card p{color:var(--muted)}
+.card__aff{
+  position:absolute;top:0;right:0;width:28px;height:28px;border-radius:999px;
+  border:1px solid var(--line);background:var(--bg);
+}
+.card__aff::before,.card__aff::after{
+  content:"";position:absolute;left:50%;top:50%;background:var(--primary);
+  border-radius:1px;transform:translate(-50%,-50%);
+}
+.card__aff::before{width:12px;height:2px}
+.card__aff::after{width:2px;height:12px;transition:transform .25s ease,opacity .25s ease}
+.card[open] .card__aff::after{transform:translate(-50%,-50%) scaleY(0);opacity:0}
+.card__more{
+  display:grid;grid-template-rows:0fr;opacity:0;
+  transition:grid-template-rows .28s ease,opacity .28s ease;
+}
+.card[open] .card__more{grid-template-rows:1fr;opacity:1}
+.card__more>div{overflow:hidden}
+.card__more ul{margin:12px 0 0;padding:0 0 0 1.1rem;color:var(--muted)}
+.card__more li{margin:0.35rem 0}
+@media (prefers-reduced-motion:reduce){
+  .card__more,.card__aff::after{transition:none}
+}
 .ico-tile{
   display:grid;place-items:center;width:56px;height:56px;border-radius:16px;
   background:var(--accent);
