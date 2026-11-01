@@ -3,58 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Furanchos — Recunchos</title>
-<meta name="description" content="Listado público de furanchos: nombre, concello, horario y ficha.">
+<title>Explorar — Recunchos</title>
+<meta name="description" content="Mapa y lista de furanchos publicados.">
 <link rel="canonical" href="https://recunchos.github.io/furanchos/">
 <meta name="theme-color" content="#F3F8FA">
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="explorar.css">
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
-<header class="topbar">
-  <div class="wrap topbar__in">
-    <a class="brand" href="/" aria-label="Recunchos, inicio">
-      <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
-      <span class="brand__name">Recunchos</span>
-    </a>
-    <div class="topbar__end">
-      <nav aria-label="Secciones">
-        <ul>
-          <li><a href="/#que-es">Qué es</a></li>
-          <li><a href="/#funciones">Funciones</a></li>
-          <li><a href="/#propietarios">Propietarios</a></li>
-          <li><a href="/#preguntas">Preguntas</a></li>
-        </ul>
-      </nav>
+<a class="skip" href="#lista">Saltar al listado</a>
+<div class="explore">
+  <header class="appbar">
+    <a class="back" href="/#funciones" aria-label="Volver a Funciones">←</a>
+    <h1>Explorar</h1>
+  </header>
+  <div class="tools">
+    <label class="skip" for="q">Buscar</label>
+    <input class="search" id="q" type="search" placeholder="Buscar casa o concello" autocomplete="off">
+    <div class="filters">
+      <label class="skip" for="concello">Concello</label>
+      <select id="concello"><option value="">Todos los concellos</option></select>
+    </div>
+    <div class="modes" role="group" aria-label="Vista">
+      <button type="button" id="modo-lista" aria-pressed="true">Lista</button>
+      <button type="button" id="modo-mapa" aria-pressed="false">Mapa</button>
+    </div>
+    <p class="count" id="como-llegar">En la ficha: dirección, Cómo llegar, vinos, tapas y horario si la casa lo publicó.</p>
+  </div>
+  <div class="stage mode-lista" id="stage">
+    <div class="map-pane" id="mapa" role="region" aria-label="Mapa de furanchos"></div>
+    <div class="list-pane">
+      <p class="count" id="estado">Cargando furanchos…</p>
+      <ul class="rows" id="lista"></ul>
     </div>
   </div>
-</header>
-<main id="contenido">
-  <section class="section">
-    <div class="wrap">
-      <h2>Furanchos</h2>
-      <p class="page-intro" id="como-llegar">Casas publicadas en el directorio. En cada ficha están la dirección, Cómo llegar, los vinos, las tapas y el horario cuando la casa lo ha publicado.</p>
-      <form class="finder" role="search">
-        <label class="skip" for="q">Buscar</label>
-        <input id="q" type="search" placeholder="Buscar por nombre o concello" autocomplete="off">
-        <label class="skip" for="concello">Concello</label>
-        <select id="concello"><option value="">Todos los concellos</option></select>
-      </form>
-      <p class="note" id="estado">Cargando furanchos…</p>
-      <ul class="house-list" id="lista"></ul>
-    </div>
-  </section>
-</main>
-<footer class="footer">
-  <div class="wrap footer__in">
-    <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
-    <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
-    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
-    <p class="footer__legal"><a href="/legal.html">Legal</a></p>
-  </div>
+</div>
+<footer class="foot">
+  <p>Si vas de furanchos, que conduzca alguien que no beba.</p>
+  <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html">Legal</a></p>
 </footer>
-<script src="/furanchos/datos.js"></script>
+<script src="vendor/leaflet.js"></script>
+<script src="datos.js"></script>
 <script>
 (function () {
   var D = window.RecunchosDatos;
@@ -62,30 +52,79 @@
   var estado = document.getElementById("estado");
   var q = document.getElementById("q");
   var concello = document.getElementById("concello");
+  var stage = document.getElementById("stage");
   var rows = [];
+  var map = L.map("mapa", { scrollWheelZoom: true });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  var layer = L.layerGroup().addTo(map);
+  map.setView([42.5, -8.4], 8);
 
-  function draw() {
+  function pin(row) {
+    var label = D.statusLabel(row);
+    var kind = label === "Abierto" || label === "Abrimos" ? "open" : "shut";
+    return L.divIcon({
+      className: "pin",
+      html: '<div style="width:18px;height:18px;border-radius:99px;border:2px solid #fff;box-shadow:0 2px 6px rgba(40,20,20,.35);background:' + (kind === "open" ? "#1F5F8B" : "#5A7084") + '"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+  }
+
+  function shown() {
     var text = q.value.trim().toLocaleLowerCase("es");
     var zone = concello.value;
-    var shown = rows.filter(function (row) {
+    return rows.filter(function (row) {
       if (zone && row.municipality !== zone) return false;
       if (!text) return true;
       return (row.name + " " + (row.municipality || "")).toLocaleLowerCase("es").indexOf(text) !== -1;
     });
-    estado.textContent = shown.length + (shown.length === 1 ? " furancho" : " furanchos");
-    lista.innerHTML = shown.map(function (row) {
+  }
+
+  function draw() {
+    var items = shown();
+    estado.textContent = items.length + (items.length === 1 ? " furancho" : " furanchos");
+    lista.innerHTML = items.map(function (row) {
       var photo = D.photoUrl(row.cover_photo_id);
       var pic = photo
-        ? '<img class="house__photo" src="' + D.esc(photo) + '" alt="">'
-        : '<span class="house__ph" aria-hidden="true">' + D.esc((row.name || "?").slice(0, 1)) + "</span>";
+        ? '<img class="avatar" alt="" src="' + D.esc(photo) + '">'
+        : '<span class="ph" aria-hidden="true">' + D.esc((row.name || "?").slice(0, 1)) + "</span>";
       var place = [row.municipality, row.province].filter(Boolean).join(" · ");
-      var status = D.statusLabel(row);
-      return '<li><a class="house" href="/furanchos/ficha.html?id=' + encodeURIComponent(row.id) + '">' +
-        pic + "<div><h3>" + D.esc(row.name) + "</h3><p>" + D.esc(place) +
-        (status ? ' <span class="house__status">' + D.esc(status) + "</span>" : "") +
-        "</p></div></a></li>";
+      var label = D.statusLabel(row);
+      var pill = "";
+      if (label === "Abierto") pill = '<span class="pill open">Abierto</span>';
+      else if (label === "Abrimos") pill = '<span class="pill soon">Abrimos</span>';
+      else if (label === "Cerrado") pill = '<span class="pill">Cerrado</span>';
+      return '<li><a class="row" href="ficha.html?id=' + encodeURIComponent(row.id) + '">' + pic +
+        "<div><h2>" + D.esc(row.name) + "</h2><p>" + D.esc(place) + "</p></div>" + pill + "</a></li>";
     }).join("");
+
+    layer.clearLayers();
+    var bounds = [];
+    items.forEach(function (row) {
+      if (row.lat == null || row.lng == null) return;
+      var marker = L.marker([row.lat, row.lng], { icon: pin(row) }).addTo(layer);
+      marker.bindTooltip(row.name + (row.municipality ? " · " + row.municipality : ""), { direction: "top", offset: [0, -8] });
+      marker.on("click", function () {
+        location.href = "ficha.html?id=" + encodeURIComponent(row.id);
+      });
+      bounds.push([row.lat, row.lng]);
+    });
+    if (bounds.length) map.fitBounds(bounds, { padding: [24, 24], maxZoom: 12 });
+    setTimeout(function () { map.invalidateSize(); }, 60);
   }
+
+  function mode(next) {
+    stage.className = "stage mode-" + next;
+    document.getElementById("modo-lista").setAttribute("aria-pressed", next === "lista" ? "true" : "false");
+    document.getElementById("modo-mapa").setAttribute("aria-pressed", next === "mapa" ? "true" : "false");
+    setTimeout(function () { map.invalidateSize(); }, 80);
+  }
+
+  document.getElementById("modo-lista").addEventListener("click", function () { mode("lista"); });
+  document.getElementById("modo-mapa").addEventListener("click", function () { mode("mapa"); });
 
   D.loadAll().then(function (data) {
     rows = data || [];
@@ -101,7 +140,6 @@
   }).catch(function () {
     estado.textContent = "No se ha podido cargar el listado.";
   });
-
   q.addEventListener("input", draw);
   concello.addEventListener("change", draw);
 })();

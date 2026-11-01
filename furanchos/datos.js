@@ -58,26 +58,39 @@
     return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(dest);
   }
 
+  var WEEK = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
+  function slotLine(slot) {
+    if (typeof slot === "string") return slot.trim();
+    if (!slot || typeof slot !== "object") return "";
+    var day = slot.day || slot.weekday || slot.dia || slot.label || "";
+    var state = slot.status || slot.state || "";
+    var from = slot.from || slot.open || slot.start || "";
+    var to = slot.to || slot.close || slot.end || "";
+    var time = from && to ? from + "–" + to : (from || to || "");
+    return [day, state, time].filter(Boolean).join(" · ");
+  }
+
+  function hourLines(hours) {
+    if (typeof hours === "string" && hours.trim()) return [hours.trim()];
+    if (!Array.isArray(hours)) return [];
+    return hours.map(slotLine).filter(Boolean);
+  }
+
+  function todayHours(row) {
+    var lines = hourLines(row.hours);
+    var today = WEEK[new Date().getDay()];
+    var match = lines.find(function (line) {
+      return line.toLocaleLowerCase("es").indexOf(today) === 0;
+    });
+    return match || "";
+  }
+
   function hoursHtml(row) {
-    var hours = row.hours;
-    var bits = [];
-    if (Array.isArray(hours)) {
-      hours.forEach(function (slot) {
-        if (typeof slot === "string" && slot.trim()) bits.push(esc(slot.trim()));
-        else if (slot && typeof slot === "object") {
-          var day = slot.day || slot.weekday || slot.dia || slot.label || "";
-          var state = slot.status || slot.state || "";
-          var from = slot.from || slot.open || slot.start || "";
-          var to = slot.to || slot.close || slot.end || "";
-          var time = from && to ? from + "–" + to : (from || to || "");
-          var line = [day, state, time].filter(Boolean).join(" · ");
-          if (line) bits.push(esc(line));
-        }
-      });
-    }
-    var note = row.hours_note ? "<p>" + esc(row.hours_note) + "</p>" : "";
-    if (!bits.length) return "<p>" + esc(row.hours_note || "Horario no publicado.") + "</p>";
-    return "<ul>" + bits.map(function (bit) { return "<li>" + bit + "</li>"; }).join("") + "</ul>" + note;
+    var bits = hourLines(row.hours).map(esc);
+    var note = row.hours_note ? "<p class=\"soft\">" + esc(row.hours_note) + "</p>" : "";
+    if (!bits.length) return "<p class=\"soft\">" + esc(row.hours_note || "Horario no publicado.") + "</p>";
+    return "<ul class=\"week\">" + bits.map(function (bit) { return "<li>" + bit + "</li>"; }).join("") + "</ul>" + note;
   }
 
   function loadAll() {
@@ -107,6 +120,7 @@
     photoUrl: photoUrl,
     mapsUrl: mapsUrl,
     hoursHtml: hoursHtml,
+    todayHours: todayHours,
     loadAll: loadAll,
     loadOne: loadOne
   };

@@ -6,84 +6,89 @@
 <title>Ficha — Recunchos</title>
 <meta name="theme-color" content="#F3F8FA">
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="explorar.css">
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
-<header class="topbar">
-  <div class="wrap topbar__in">
-    <a class="brand" href="/" aria-label="Recunchos, inicio">
-      <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
-      <span class="brand__name">Recunchos</span>
-    </a>
-    <div class="topbar__end">
-      <nav aria-label="Secciones">
-        <ul>
-          <li><a href="/furanchos/">Furanchos</a></li>
-          <li><a href="/#funciones">Funciones</a></li>
-        </ul>
-      </nav>
-    </div>
-  </div>
+<a class="skip" href="#ficha">Saltar al contenido</a>
+<header class="appbar">
+  <a class="back" href="index.html" aria-label="Volver a Explorar">←</a>
+  <h1>Ficha</h1>
 </header>
-<main id="contenido">
-  <section class="section">
-    <div class="wrap narrow">
-      <p class="note"><a href="/furanchos/">Todos los furanchos</a></p>
-      <article class="ficha" id="ficha"><p class="note">Cargando ficha…</p></article>
-    </div>
-  </section>
-</main>
-<footer class="footer">
-  <div class="wrap footer__in">
-    <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
-    <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
-    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
-    <p class="footer__legal"><a href="/legal.html">Legal</a></p>
-  </div>
+<main class="sheet" id="ficha"><p class="err">Cargando ficha…</p></main>
+<footer class="foot">
+  <p>Si vas de furanchos, que conduzca alguien que no beba.</p>
+  <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html">Legal</a></p>
 </footer>
-<script src="/furanchos/datos.js"></script>
+<script src="vendor/leaflet.js"></script>
+<script src="datos.js"></script>
 <script>
 (function () {
   var D = window.RecunchosDatos;
   var root = document.getElementById("ficha");
   var id = new URLSearchParams(location.search).get("id");
   if (!id) {
-    root.innerHTML = "<p>No hay ninguna ficha seleccionada.</p>";
+    root.innerHTML = "<p class=\"err\">No hay ninguna ficha seleccionada.</p>";
     return;
   }
   D.loadOne(id).then(function (row) {
     if (!row) {
-      root.innerHTML = "<p>No encontramos esta ficha.</p>";
+      root.innerHTML = "<p class=\"err\">No encontramos esta ficha.</p>";
       return;
     }
     document.title = row.name + " — Recunchos";
     var photo = D.photoUrl(row.cover_photo_id);
     var place = [row.municipality, row.comarca, row.province].filter(Boolean).join(" · ");
-    var status = D.statusLabel(row);
+    var label = D.statusLabel(row);
+    var today = D.todayHours(row);
+    var statusClass = label === "Abierto" || label === "Abrimos" ? "open" : "";
+    var statusText = label ? label : "Sin estado de hoy";
+    if (today) statusText += " · " + today;
+    else if (!label) statusText = "Horario de hoy no publicado";
     var wines = D.listText(row.wine_types);
     var food = D.listText(row.food).concat(D.listText(row.menu));
     var maps = D.mapsUrl(row);
     var address = row.address || "Dirección no publicada.";
-    if (row.coords_approximate && row.address) address += " La posición en el mapa es aproximada.";
+    if (row.coords_approximate && row.address) address += " La posición del mapa es aproximada.";
+    var cover = photo
+      ? '<img class="cover" alt="" src="' + D.esc(photo) + '">'
+      : '<div class="cover-ph" aria-hidden="true">' + D.esc((row.name || "?").slice(0, 1)) + "</div>";
     root.innerHTML =
-      '<div class="ficha__hero">' +
-        (photo ? '<img src="' + D.esc(photo) + '" alt="">' : "") +
-        "<div><p class=\"note\">" + D.esc(row.local_type_label || "Furancho") + "</p>" +
-        "<h2>" + D.esc(row.name) + "</h2>" +
-        "<p>" + D.esc(place) + (status ? ' · <span class="status">' + D.esc(status) + "</span>" : "") + "</p>" +
-        (maps ? '<p><a class="open-map" href="' + D.esc(maps) + '" rel="noopener">Cómo llegar</a></p>' : "") +
-        "</div></div>" +
-      "<dl>" +
-      "<div><dt>Dirección</dt><dd>" + D.esc(address) + "</dd></div>" +
-      (row.season_label ? "<div><dt>Temporada</dt><dd>" + D.esc(row.season_label) + "</dd></div>" : "") +
-      "<div><dt>Horario</dt><dd>" + D.hoursHtml(row) + (row.closed_note ? "<p>" + D.esc(row.closed_note) + "</p>" : "") + "</dd></div>" +
-      "<div><dt>Vinos</dt><dd>" + D.esc(wines.length ? wines.join(", ") : "Sin vinos publicados.") + "</dd></div>" +
-      "<div><dt>Tapas</dt><dd>" + D.esc(food.length ? food.join(", ") : "Sin tapas publicadas.") + "</dd></div>" +
-      (row.description ? "<div><dt>La casa</dt><dd>" + D.esc(row.description) + "</dd></div>" : "") +
-      "</dl>";
+      cover +
+      "<section><p class=\"kicker\">" + D.esc(row.local_type_label || "Furancho") + "</p>" +
+      "<h2 style=\"font-size:1.8rem\">" + D.esc(row.name) + "</h2>" +
+      "<p class=\"zone\">" + D.esc(place) + "</p>" +
+      "<p class=\"status-line " + statusClass + "\">" + D.esc(statusText) + "</p>" +
+      (maps ? '<div class="actions"><a href="' + D.esc(maps) + '" rel="noopener">Cómo llegar</a></div>' : "") +
+      "</section>" +
+      "<section class=\"block\"><h2>Horario de la semana</h2>" + D.hoursHtml(row) +
+      (row.closed_note ? "<p class=\"soft\">" + D.esc(row.closed_note) + "</p>" : "") +
+      (row.season_label ? "<p class=\"soft\">Temporada: " + D.esc(row.season_label) + "</p>" : "") +
+      "</section>" +
+      "<section class=\"block\"><h2>Dirección</h2><p>" + D.esc(address) + "</p></section>" +
+      "<section class=\"block\"><h2>Vinos y tapas</h2><p>" +
+      D.esc(wines.length ? "Vinos: " + wines.join(", ") : "Sin vinos publicados.") + "</p><p class=\"soft\">" +
+      D.esc(food.length ? "Tapas: " + food.join(", ") : "Sin tapas publicadas.") + "</p></section>" +
+      (row.description ? "<section class=\"block\"><h2>La casa</h2><p>" + D.esc(row.description) + "</p></section>" : "") +
+      "<div class=\"mini-map\" id=\"mapa-ficha\"></div>";
+    if (row.lat != null && row.lng != null) {
+      var map = L.map("mapa-ficha", { scrollWheelZoom: false }).setView([row.lat, row.lng], 14);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      L.marker([row.lat, row.lng], {
+        icon: L.divIcon({
+          className: "pin",
+          html: '<div style="width:18px;height:18px;border-radius:99px;border:2px solid #fff;box-shadow:0 2px 6px rgba(40,20,20,.35);background:#1F5F8B"></div>',
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        })
+      }).addTo(map);
+      setTimeout(function () { map.invalidateSize(); }, 80);
+    }
   }).catch(function () {
-    root.innerHTML = "<p>No se ha podido cargar la ficha.</p>";
+    root.innerHTML = "<p class=\"err\">No se ha podido cargar la ficha.</p>";
   });
 })();
 </script>
