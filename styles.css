@@ -116,6 +116,13 @@ p{margin:0}
 }
 .auth .links{display:flex;justify-content:space-between;gap:12px;margin-top:16px;font-size:.92rem}
 .auth .err{color:#8A3B2A;margin-top:12px}
+.auth .ok{color:var(--success);margin-top:12px}
+.auth .hint,.auth .version{color:var(--muted);font-size:.85rem;margin:8px 0}
+.auth .kinds{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0}
+.auth .kinds label{font-weight:600;margin:6px 0}
+.auth .check{display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:12px 0}
+.auth .check input{width:auto;margin-top:4px}
+.auth button:disabled{opacity:.55}
 .login-link:hover,.account__user:hover{color:var(--primary-ink);background:#17496C}
 .account__avatar{
   width:28px;height:28px;border-radius:50%;overflow:hidden;background:#17496C;color:#fff;

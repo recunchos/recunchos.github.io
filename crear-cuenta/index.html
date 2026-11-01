@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crear cuenta — Recunchos</title>
+<meta name="theme-color" content="#F3F8FA">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#alta">Saltar al contenido</a>
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="/" aria-label="Recunchos, inicio">
+      <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
+      <span class="brand__name">Recunchos</span>
+    </a>
+    <div class="topbar__end">
+      <nav aria-label="Secciones">
+        <ul>
+          <li><a href="/#funciones">Funciones</a></li>
+          <li><a href="/furanchos/">Furanchos</a></li>
+        </ul>
+      </nav>
+      <div class="account" data-sesion>
+        <a class="login-link" href="/entrar/">Iniciar sesión</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="alta">
+  <form class="auth" id="form">
+    <h1>Crear cuenta</h1>
+    <p>El alta es en la web, con los mismos datos que en la app. Sigues aquí.</p>
+    <fieldset class="kinds">
+      <legend>Tipo de cuenta</legend>
+      <label><input type="radio" name="kind" value="comensal" checked> Quiero ir de furanchos</label>
+      <label><input type="radio" name="kind" value="propietario"> Soy propietario</label>
+    </fieldset>
+    <label for="name">Nombre</label>
+    <input id="name" name="name" autocomplete="name" required>
+    <label for="email">Correo</label>
+    <input id="email" name="email" type="email" autocomplete="username" required>
+    <label for="password">Contraseña</label>
+    <input id="password" name="password" type="password" autocomplete="new-password" required>
+    <p class="hint">Mínimo 8 caracteres, con una letra y un número.</p>
+    <label for="municipality">Municipio</label>
+    <input id="municipality" name="municipality" autocomplete="address-level2" required>
+    <p class="version">VERSIÓN v2.1.4 (Recunchos) — APROBADA por el titular el 31/10/2026</p>
+    <p class="hint">Entrada en vigor: v2, v2.1, v2.1.1, v2.1.2, v2.1.3 y v2.1.4 el 31 de octubre de 2026. Última actualización: 31 de octubre de 2026.</p>
+    <label class="check"><input id="age" name="age" type="checkbox"> <span><strong>Confirmo que tengo 18 años o más.</strong> Recunchos trata de establecimientos donde se vende vino y solo está disponible para mayores de 18 años. No se aceptan menores: si detectamos que una cuenta pertenece a una persona menor de 18 años, la eliminaremos junto con sus datos. (Condiciones de uso, apartado 4.2; Política de privacidad, apartado 2.11.)</span></label>
+    <label class="check"><input id="terms" name="terms" type="checkbox"> <span><strong>He leído y acepto las Condiciones de uso.</strong> <a href="https://fwfwfbtzarmwalfaxelh.supabase.co/functions/v1/legal/terminos" rel="noopener">Enlace a las Condiciones de uso.</a></span></label>
+    <label class="check"><input id="privacy" name="privacy" type="checkbox"> <span><strong>He leído la Política de privacidad.</strong> Marcar esta casilla solo confirma que has recibido la información; no es un consentimiento. <a href="https://fwfwfbtzarmwalfaxelh.supabase.co/functions/v1/legal/privacidad" rel="noopener">Enlace a la Política de privacidad.</a></span></label>
+    <p class="err" id="error" hidden></p>
+    <p class="ok" id="ok" hidden></p>
+    <button type="submit" id="submit" disabled>Crear cuenta</button>
+    <div class="links">
+      <a id="entrar" href="/entrar/">Ya tengo cuenta</a>
+    </div>
+  </form>
+</main>
+<footer class="footer">
+  <div class="wrap footer__in">
+    <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
+    <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
+    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
+    <p class="footer__legal"><a href="/legal.html">Legal</a></p>
+  </div>
+</footer>
+<script src="/sesion.js"></script>
+<script>
+(function () {
+  var S = window.RecunchosSesion;
+  var params = new URLSearchParams(location.search);
+  var next = S.safeNext(params.get("next"));
+  document.getElementById("entrar").href = "/entrar/?next=" + encodeURIComponent(next);
+  if (S.read()) {
+    location.replace(next);
+    return;
+  }
+  var form = document.getElementById("form");
+  var error = document.getElementById("error");
+  var ok = document.getElementById("ok");
+  var button = document.getElementById("submit");
+  var boxes = [form.age, form.terms, form.privacy];
+  function ready() {
+    button.disabled = !(form.age.checked && form.terms.checked && form.privacy.checked);
+  }
+  boxes.forEach(function (box) { box.addEventListener("change", ready); });
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    error.hidden = true;
+    ok.hidden = true;
+    button.disabled = true;
+    var kind = form.kind.value;
+    S.signUp({
+      name: form.name.value,
+      email: form.email.value,
+      password: form.password.value,
+      municipality: form.municipality.value,
+      accountKind: kind,
+      ageConfirmed: form.age.checked,
+      termsAccepted: form.terms.checked,
+      privacyAcknowledged: form.privacy.checked
+    }).then(function (result) {
+      ready();
+      if (!result.ok) {
+        error.textContent = result.message;
+        error.hidden = false;
+        return;
+      }
+      if (result.confirmEmail) {
+        ok.textContent = result.message;
+        ok.hidden = false;
+        form.querySelectorAll("input, button").forEach(function (el) { el.disabled = true; });
+        return;
+      }
+      location.assign(next);
+    });
+  });
+})();
+</script>
+</body>
+</html>

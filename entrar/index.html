@@ -38,7 +38,7 @@
     <button type="submit">Entrar</button>
     <div class="links">
       <a href="/app/olvidada">¿Olvidaste tu contraseña?</a>
-      <a href="/app/registro">Crear cuenta</a>
+      <a href="/crear-cuenta/">Crear cuenta</a>
     </div>
   </form>
 </main>
@@ -56,6 +56,8 @@
   var S = window.RecunchosSesion;
   var params = new URLSearchParams(location.search);
   var next = S.safeNext(params.get("next"));
+  var create = document.querySelector(".links a[href='/crear-cuenta/']");
+  if (create) create.href = "/crear-cuenta/?next=" + encodeURIComponent(next);
   if (S.read()) {
     location.replace(next);
     return;

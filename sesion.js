@@ -76,6 +76,18 @@
     return "/entrar/?next=" + encodeURIComponent(here());
   }
 
+  function registerHref() {
+    return "/crear-cuenta/?next=" + encodeURIComponent(here());
+  }
+
+  function passwordProblem(password) {
+    if (!password || password.length < 8) return "La contraseña necesita al menos 8 caracteres.";
+    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(password) || !/\d/.test(password)) {
+      return "La contraseña necesita una letra y un número.";
+    }
+    return "";
+  }
+
   function authHeaders(session, json) {
     var headers = {
       apikey: ANON,
@@ -108,6 +120,100 @@
       });
     }).catch(function () {
       return { ok: false, message: "No hay conexión. Vuelve a intentarlo." };
+    });
+  }
+
+  function signUp(fields) {
+    var name = String(fields.name || "").trim();
+    var email = String(fields.email || "").trim().toLowerCase();
+    var municipality = String(fields.municipality || "").trim();
+    var accountKind = fields.accountKind === "propietario" ? "propietario" : "comensal";
+    if (!name) return Promise.resolve({ ok: false, message: "Escribe tu nombre." });
+    if (!email.includes("@") || !email.includes(".") || email.charAt(0) === "@" || email.slice(-1) === "@") {
+      return Promise.resolve({ ok: false, message: "El correo no parece válido." });
+    }
+    var passwordError = passwordProblem(fields.password);
+    if (passwordError) return Promise.resolve({ ok: false, message: passwordError });
+    if (!municipality) return Promise.resolve({ ok: false, message: "Escribe el municipio." });
+    if (!fields.ageConfirmed) return Promise.resolve({ ok: false, message: "Confirma que tienes 18 años o más para crear la cuenta." });
+    if (!fields.termsAccepted) return Promise.resolve({ ok: false, message: "Acepta las Condiciones de uso para crear la cuenta." });
+    if (!fields.privacyAcknowledged) return Promise.resolve({ ok: false, message: "Confirma que has leído la Política de privacidad para crear la cuenta." });
+    var stamp = new Date().toISOString();
+    return fetch(SUPABASE + "/auth/v1/signup?redirect_to=" + encodeURIComponent("https://recunchos.github.io/app/"), {
+      method: "POST",
+      headers: { apikey: ANON, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: email,
+        password: fields.password,
+        data: {
+          full_name: name,
+          account_kind: accountKind,
+          municipality: municipality,
+          age_confirmed_18: true,
+          age_confirmed_18_at: stamp,
+          terms_accepted_at: stamp,
+          privacy_acknowledged_at: stamp,
+          legal_text_version: "v2.1"
+        },
+        email_redirect_to: "https://recunchos.github.io/app/"
+      })
+    }).then(function (res) {
+      return res.json().then(function (body) {
+        if (!res.ok) {
+          var raw = body && (body.msg || body.error_description || body.message) || "";
+          if (/invalid/i.test(raw) && /email/i.test(raw)) return { ok: false, message: "El correo no parece válido." };
+          if (/already registered|already exists/i.test(raw)) return { ok: false, message: "Ese correo ya tiene cuenta. Entra con la contraseña." };
+          if (/rate limit|over_email_send/i.test(raw)) return { ok: false, message: "Hay demasiados envíos seguidos. Espera un rato y vuelve a intentarlo." };
+          return { ok: false, message: publicError(raw) === "No se ha podido completar." ? "No se pudo crear la cuenta. Inténtalo de nuevo." : publicError(raw) };
+        }
+        var user = body.user || (body.data && body.data.user);
+        var session = body.session || (body.access_token ? body : null);
+        if (body.access_token) session = body;
+        var identities = user && user.identities;
+        if (user && Array.isArray(identities) && identities.length === 0) {
+          return { ok: false, message: "Ese correo ya tiene cuenta. Entra con la contraseña. Si aún no la confirmaste, abre el correo de Recunchos." };
+        }
+        if (!user) return { ok: false, message: "No se pudo crear la cuenta. Inténtalo de nuevo." };
+        if (!session || !session.access_token) {
+          return { ok: true, confirmEmail: true, message: "Alta creada. Revisa el correo y pulsa el enlace para confirmarla. Hasta entonces no se puede entrar. El mensaje sale de Recunchos y el enlace abre la app." };
+        }
+        save(session);
+        return updateProfile(session, { name: name, municipality: municipality, accountKind: accountKind }).then(function (warning) {
+          return { ok: true, confirmEmail: false, warning: warning, owner: accountKind === "propietario" };
+        });
+      });
+    }).catch(function () {
+      return { ok: false, message: "No hay conexión. Vuelve a intentarlo." };
+    });
+  }
+
+  function updateProfile(session, profile) {
+    var headers = authHeaders(session, true);
+    headers.Prefer = "return=minimal";
+    var url = SUPABASE + "/rest/v1/profiles?id=eq." + encodeURIComponent(session.user.id);
+    return fetch(url, {
+      method: "PATCH",
+      headers: headers,
+      body: JSON.stringify({ name: profile.name, municipality: profile.municipality })
+    }).then(function (res) {
+      if (!res.ok) return "La cuenta está creada, pero no se pudo guardar el municipio en el perfil.";
+      if (profile.accountKind !== "propietario") return "";
+      return fetch(url, {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify({ account_kind: "propietario" })
+      }).then(function (kind) {
+        if (kind.ok) return "";
+        return kind.json().then(function (body) {
+          var message = body && body.message || "";
+          if (/account_kind|schema cache|PGRST204|column/i.test(message)) return "";
+          return "La cuenta está creada, pero no se pudo marcar el alta de propietario en el perfil.";
+        }).catch(function () {
+          return "La cuenta está creada, pero no se pudo marcar el alta de propietario en el perfil.";
+        });
+      });
+    }).catch(function () {
+      return "La cuenta está creada, pero no se pudo guardar el municipio en el perfil.";
     });
   }
 
@@ -245,6 +351,8 @@
       else {
         var link = boxes[i].querySelector(".login-link");
         if (link) link.setAttribute("href", loginHref());
+        var create = boxes[i].querySelector(".account__ghost");
+        if (create) create.setAttribute("href", registerHref());
       }
     }
     if (session) bindMenus();
@@ -264,7 +372,9 @@
     safeNext: safeNext,
     loginHref: loginHref,
     signIn: signIn,
+    signUp: signUp,
     signOut: signOut,
+    registerHref: registerHref,
     isFollowing: isFollowing,
     setFollow: setFollow,
     seal: seal
