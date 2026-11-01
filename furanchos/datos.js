@@ -6,7 +6,7 @@
     "lat", "lng", "coords_approximate", "description", "wine_types", "food",
     "menu", "hours", "hours_note", "season_label", "today_status",
     "today_status_on", "closed", "closed_note", "cover_photo_id", "local_type_label",
-    "phone"
+    "phone", "autonomous_community", "local_type"
   ].join(",");
 
   function esc(value) {
@@ -107,6 +107,26 @@
     return "<ul class=\"week\">" + bits.map(function (bit) { return "<li>" + bit + "</li>"; }).join("") + "</ul>" + note;
   }
 
+  var SPAIN_COMMUNITIES = [
+    { id: "asturias", name: "Asturias", localName: "Llagares", photo: "photos/stone.jpg", intro: "Llagares. La sidra nueva y las espichas se concentran de febrero a mayo. La visita suele pedirse con reserva." },
+    { id: "pais-vasco", name: "País Vasco", localName: "Sidrerías", photo: "photos/cellar.jpg", intro: "Sidrerías. Temporada de txotx, de mediados de enero a abril o mayo. La sidra nueva se sirve en el caserío." },
+    { id: "navarra", name: "Navarra", localName: "Sidrerías", photo: "photos/hills.jpg", intro: "Sidrerías. Temporada de enero a mayo. Cinco casas elaboran y guardan su propia sidra." },
+    { id: "andalucia", name: "Andalucía", localName: "Mostos", photo: "photos/grapes.jpg", intro: "Mostos. De noviembre a la primavera. En Trebujena un bando municipal regula la venta temporal." },
+    { id: "canarias", name: "Canarias", localName: "Guachinches", photo: "photos/vineyard.jpg", intro: "Guachinches. El viticultor vende el vino de su cosecha, como mucho cuatro meses al año, hasta que se acaba (Decreto 83/2013)." }
+  ];
+
+  function isGaliciaPlace(row) {
+    var community = row.autonomous_community == null ? "Galicia" : row.autonomous_community;
+    var kind = row.local_type == null ? "furancho" : row.local_type;
+    return community === "Galicia" && kind === "furancho";
+  }
+
+  function placesInCommunity(list, name) {
+    return list.filter(function (row) {
+      return !isGaliciaPlace(row) && row.autonomous_community === name;
+    });
+  }
+
   function loadAll() {
     var url = SUPABASE + "/rest/v1/furanchos?select=" + FIELDS + "&hidden=eq.false&order=name.asc&limit=1000";
     return fetch(url, {
@@ -138,6 +158,9 @@
     hoursHtml: hoursHtml,
     todayHours: todayHours,
     loadAll: loadAll,
-    loadOne: loadOne
+    loadOne: loadOne,
+    isGaliciaPlace: isGaliciaPlace,
+    placesInCommunity: placesInCommunity,
+    SPAIN_COMMUNITIES: SPAIN_COMMUNITIES
   };
 })(window);
