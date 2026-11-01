@@ -117,7 +117,7 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:0;mar
 .foot a{color:var(--muted)}
 .sheet{padding:0 16px 32px;display:grid;gap:14px}
 .cover,.cover-ph{
-  width:100%;max-width:720px;height:auto;aspect-ratio:3 / 2;border-radius:18px;background:var(--bg-deep);
+  width:100%;max-width:760px;height:auto;aspect-ratio:16 / 9;border-radius:18px;background:var(--bg-deep);
 }
 .cover{object-fit:cover;object-position:center;margin-inline:auto}
 .cover-ph{
@@ -153,7 +153,7 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:0;mar
   background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;color:inherit;
 }
 .community img{
-  display:block;width:100%;max-width:100%;height:auto;aspect-ratio:3 / 2;
+  display:block;width:100%;max-width:100%;height:auto;aspect-ratio:16 / 9;
   object-fit:cover;object-position:center;
 }
 .community .copy{padding:14px;display:grid;gap:2px}
@@ -168,6 +168,9 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:0;mar
 .back-link{
   justify-self:start;border:0;background:transparent;color:var(--primary);
   font-weight:600;padding:0;cursor:pointer;min-height:36px;
+}
+@media (max-width:899px){
+  .appbar,.tools,.spain,.sheet,.list-pane,.community-head,.foot{padding-left:8px;padding-right:8px}
 }
 @media (min-width:900px){
   .explore{max-width:1180px;margin:0 auto}
