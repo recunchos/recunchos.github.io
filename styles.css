@@ -73,20 +73,32 @@ p{margin:0}
 }
 .topbar nav a:hover{color:var(--primary);background:var(--tint)}
 .topbar__end{display:flex;align-items:center;gap:8px;min-width:0}
-.login-link{
-  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+.account{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.account__ghost,.login-link,.account__user{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;
   min-height:40px;padding:8px 14px;border-radius:999px;
-  background:var(--primary);color:var(--primary-ink);
   text-decoration:none;font-weight:700;font-size:.9rem;white-space:nowrap;
 }
-.login-link:hover{color:var(--primary-ink);background:#17496C}
+.account__ghost{
+  background:transparent;color:var(--primary);border:1px solid var(--primary);padding:7px 12px;
+}
+.account__ghost:hover{background:var(--tint);color:var(--primary)}
+.login-link,.account__user{background:var(--primary);color:var(--primary-ink);border:1px solid var(--primary)}
+.login-link:hover,.account__user:hover{color:var(--primary-ink);background:#17496C}
+.account__avatar{
+  width:28px;height:28px;border-radius:50%;overflow:hidden;background:#17496C;color:#fff;
+  display:grid;place-items:center;font-size:.8rem;
+}
+.account__avatar img{width:100%;height:100%;object-fit:cover}
+.account .skip{position:absolute;left:-9999px}
 @media (max-width:719px){
   .topbar__in{flex-wrap:wrap;row-gap:2px;padding-top:8px;padding-bottom:8px}
   .topbar__end{display:contents}
   .brand{order:1}
-  .login-link{order:2;margin-left:auto}
+  .account{order:2;margin-left:auto}
   .topbar nav{order:3;flex:1 0 100%}
   .topbar nav ul{justify-content:center;flex-wrap:wrap}
+  .account__ghost,.login-link,.account__user{min-height:36px;padding:6px 10px;font-size:.8rem}
 }
 @media (min-width:640px){.topbar nav a{font-size:.9rem;padding:8px 12px}}
 
