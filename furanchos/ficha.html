@@ -14,12 +14,17 @@
 <header class="appbar">
   <a class="back" href="index.html" aria-label="Volver a Explorar">←</a>
   <h1>Ficha</h1>
+  <div class="appbar__account" data-sesion>
+    <a class="account__ghost" href="/app/registro">Crear cuenta</a>
+    <a class="login-link" href="/app/elegir">Iniciar sesión</a>
+  </div>
 </header>
 <main class="sheet" id="ficha"><p class="err">Cargando ficha…</p></main>
 <footer class="foot">
   <p>Si vas de furanchos, que conduzca alguien que no beba.</p>
   <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html">Legal</a></p>
 </footer>
+<script src="/sesion.js"></script>
 <script src="vendor/leaflet.js"></script>
 <script src="datos.js"></script>
 <script>
@@ -50,9 +55,14 @@
     var maps = D.mapsUrl(row);
     var dial = D.dialablePhone(row.phone);
     var phoneLine = row.phone ? D.formatPhone(row.phone) : "Teléfono no indicado.";
+    var session = window.RecunchosSesion && RecunchosSesion.read();
+    var housePath = "/furancho/" + encodeURIComponent(row.id);
+    var accountHref = session ? "/app" + housePath : "/app/elegir?next=" + encodeURIComponent(housePath);
     var actions = "";
     if (maps) actions += '<a href="' + D.esc(maps) + '" rel="noopener">Cómo llegar</a>';
+    if (D.isGaliciaPlace(row)) actions += '<a class="outline" href="' + accountHref + '">Sellar</a>';
     if (dial) actions += '<a class="outline" href="tel:' + D.esc(dial) + '">Llamar</a>';
+    actions += '<a class="outline" href="' + accountHref + '">Seguir</a>';
     var address = row.address || "Dirección no publicada.";
     if (row.coords_approximate && row.address) address += " La posición del mapa es aproximada.";
     var cover = photo
