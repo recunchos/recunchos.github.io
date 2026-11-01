@@ -150,42 +150,59 @@ p{margin:0}
 .cards>li{display:flex;min-width:0;align-items:flex-start}
 .card{
   display:flex;flex-direction:column;flex:1 1 auto;width:100%;align-self:flex-start;
+  position:relative;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:24px 22px;color:inherit;text-decoration:none;
+  padding:24px 48px 24px 22px;color:inherit;text-decoration:none;
   box-shadow:0 8px 24px rgba(19,41,61,.05);
 }
 .card:hover{border-color:var(--primary);color:inherit}
-.card summary{
-  display:flex;flex-direction:column;position:relative;
-  padding-right:36px;cursor:pointer;list-style:none;
-  font:inherit;color:inherit;
-}
-.card summary::-webkit-details-marker{display:none}
-.card summary:focus-visible{outline:2px solid var(--primary);outline-offset:4px;border-radius:8px}
+.card:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 .card h3{font-size:1.08rem;color:var(--text);margin:14px 0 8px;letter-spacing:.03em}
 .card p{color:var(--muted)}
 .card__aff{
-  position:absolute;top:0;right:0;width:28px;height:28px;border-radius:999px;
+  position:absolute;top:24px;right:16px;width:28px;height:28px;border-radius:999px;
   border:1px solid var(--line);background:var(--bg);
 }
-.card__aff::before,.card__aff::after{
-  content:"";position:absolute;left:50%;top:50%;background:var(--primary);
-  border-radius:1px;transform:translate(-50%,-50%);
+.card__aff::before{
+  content:"";position:absolute;left:11px;top:9px;width:7px;height:7px;
+  border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);
+  transform:rotate(-45deg);
 }
-.card__aff::before{width:12px;height:2px}
-.card__aff::after{width:2px;height:12px;transition:transform .25s ease,opacity .25s ease}
-.card[open] .card__aff::after{transform:translate(-50%,-50%) scaleY(0);opacity:0}
-.card__more{
-  display:grid;grid-template-rows:0fr;opacity:0;
-  transition:grid-template-rows .28s ease,opacity .28s ease;
+.page-intro{max-width:40rem;margin:0 auto 22px;text-align:center;color:var(--text)}
+.finder{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:0 auto 18px;max-width:40rem}
+.finder input,.finder select{
+  font:600 .95rem/1.3 var(--sans);color:var(--text);background:var(--card);
+  border:1px solid var(--line);border-radius:999px;padding:10px 16px;min-height:44px;
 }
-.card[open] .card__more{grid-template-rows:1fr;opacity:1}
-.card__more>div{overflow:hidden}
-.card__more ul{margin:12px 0 0;padding:0 0 0 1.1rem;color:var(--muted)}
-.card__more li{margin:0.35rem 0}
-@media (prefers-reduced-motion:reduce){
-  .card__more,.card__aff::after{transition:none}
+.finder input{min-width:min(100%,16rem);flex:1}
+.house-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.house{
+  display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px;color:inherit;text-decoration:none;
+  box-shadow:0 8px 24px rgba(19,41,61,.05);
 }
+.house:hover{border-color:var(--primary)}
+.house__photo,.house__ph{
+  width:72px;height:72px;border-radius:12px;object-fit:cover;background:var(--bg-2);
+}
+.house__ph{display:grid;place-items:center;color:var(--primary);font-family:var(--serif);font-weight:700}
+.house h3{margin:0 0 4px;font-size:1.05rem;color:var(--text)}
+.house p{margin:0;color:var(--muted);font-size:.92rem}
+.house__status{color:var(--primary);font-weight:700}
+.ficha{display:grid;gap:16px}
+.ficha__hero{display:grid;gap:14px}
+.ficha__hero img{width:100%;max-height:320px;object-fit:cover;border-radius:var(--r);background:var(--bg-2)}
+.ficha h2{margin-bottom:6px}
+.ficha dl{margin:0;display:grid;gap:10px}
+.ficha dt{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--primary)}
+.ficha dd{margin:2px 0 0}
+.ficha .open-map{
+  display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;border-radius:999px;
+  background:var(--primary);color:var(--primary-ink);text-decoration:none;font-weight:700;
+}
+.note{color:var(--muted)}
+.status{font-weight:700;color:var(--primary)}
 .ico-tile{
   display:grid;place-items:center;width:56px;height:56px;border-radius:16px;
   background:var(--accent);

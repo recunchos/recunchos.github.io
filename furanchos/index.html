@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Furanchos — Recunchos</title>
+<meta name="description" content="Listado público de furanchos: nombre, concello, horario y ficha.">
+<link rel="canonical" href="https://recunchos.github.io/furanchos/">
+<meta name="theme-color" content="#F3F8FA">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="/" aria-label="Recunchos, inicio">
+      <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
+      <span class="brand__name">Recunchos</span>
+    </a>
+    <div class="topbar__end">
+      <nav aria-label="Secciones">
+        <ul>
+          <li><a href="/#que-es">Qué es</a></li>
+          <li><a href="/#funciones">Funciones</a></li>
+          <li><a href="/#propietarios">Propietarios</a></li>
+          <li><a href="/#preguntas">Preguntas</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+<main id="contenido">
+  <section class="section">
+    <div class="wrap">
+      <h2>Furanchos</h2>
+      <p class="page-intro" id="como-llegar">Casas publicadas en el directorio. En cada ficha están la dirección, Cómo llegar, los vinos, las tapas y el horario cuando la casa lo ha publicado.</p>
+      <form class="finder" role="search">
+        <label class="skip" for="q">Buscar</label>
+        <input id="q" type="search" placeholder="Buscar por nombre o concello" autocomplete="off">
+        <label class="skip" for="concello">Concello</label>
+        <select id="concello"><option value="">Todos los concellos</option></select>
+      </form>
+      <p class="note" id="estado">Cargando furanchos…</p>
+      <ul class="house-list" id="lista"></ul>
+    </div>
+  </section>
+</main>
+<footer class="footer">
+  <div class="wrap footer__in">
+    <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
+    <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
+    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
+    <p class="footer__legal"><a href="/legal.html">Legal</a></p>
+  </div>
+</footer>
+<script src="/furanchos/datos.js"></script>
+<script>
+(function () {
+  var D = window.RecunchosDatos;
+  var lista = document.getElementById("lista");
+  var estado = document.getElementById("estado");
+  var q = document.getElementById("q");
+  var concello = document.getElementById("concello");
+  var rows = [];
+
+  function draw() {
+    var text = q.value.trim().toLocaleLowerCase("es");
+    var zone = concello.value;
+    var shown = rows.filter(function (row) {
+      if (zone && row.municipality !== zone) return false;
+      if (!text) return true;
+      return (row.name + " " + (row.municipality || "")).toLocaleLowerCase("es").indexOf(text) !== -1;
+    });
+    estado.textContent = shown.length + (shown.length === 1 ? " furancho" : " furanchos");
+    lista.innerHTML = shown.map(function (row) {
+      var photo = D.photoUrl(row.cover_photo_id);
+      var pic = photo
+        ? '<img class="house__photo" src="' + D.esc(photo) + '" alt="">'
+        : '<span class="house__ph" aria-hidden="true">' + D.esc((row.name || "?").slice(0, 1)) + "</span>";
+      var place = [row.municipality, row.province].filter(Boolean).join(" · ");
+      var status = D.statusLabel(row);
+      return '<li><a class="house" href="/furanchos/ficha.html?id=' + encodeURIComponent(row.id) + '">' +
+        pic + "<div><h3>" + D.esc(row.name) + "</h3><p>" + D.esc(place) +
+        (status ? ' <span class="house__status">' + D.esc(status) + "</span>" : "") +
+        "</p></div></a></li>";
+    }).join("");
+  }
+
+  D.loadAll().then(function (data) {
+    rows = data || [];
+    var zones = {};
+    rows.forEach(function (row) { if (row.municipality) zones[row.municipality] = true; });
+    Object.keys(zones).sort(function (a, b) { return a.localeCompare(b, "es"); }).forEach(function (name) {
+      var opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      concello.appendChild(opt);
+    });
+    draw();
+  }).catch(function () {
+    estado.textContent = "No se ha podido cargar el listado.";
+  });
+
+  q.addEventListener("input", draw);
+  concello.addEventListener("change", draw);
+})();
+</script>
+</body>
+</html>
