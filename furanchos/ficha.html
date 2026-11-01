@@ -16,7 +16,7 @@
   <h1>Ficha</h1>
   <div class="appbar__account" data-sesion>
     <a class="account__ghost" href="/app/registro">Crear cuenta</a>
-    <a class="login-link" href="/app/elegir">Iniciar sesión</a>
+    <a class="login-link" href="/entrar/">Iniciar sesión</a>
   </div>
 </header>
 <main class="sheet" id="ficha"><p class="err">Cargando ficha…</p></main>
@@ -55,14 +55,20 @@
     var maps = D.mapsUrl(row);
     var dial = D.dialablePhone(row.phone);
     var phoneLine = row.phone ? D.formatPhone(row.phone) : "Teléfono no indicado.";
-    var session = window.RecunchosSesion && RecunchosSesion.read();
-    var housePath = "/furancho/" + encodeURIComponent(row.id);
-    var accountHref = session ? "/app" + housePath : "/app/elegir?next=" + encodeURIComponent(housePath);
+    var S = window.RecunchosSesion;
+    var session = S && S.read();
+    var back = "/entrar/?next=" + encodeURIComponent(location.pathname + location.search);
     var actions = "";
     if (maps) actions += '<a href="' + D.esc(maps) + '" rel="noopener">Cómo llegar</a>';
-    if (D.isGaliciaPlace(row)) actions += '<a class="outline" href="' + accountHref + '">Sellar</a>';
+    if (D.isGaliciaPlace(row)) {
+      actions += session
+        ? '<button type="button" class="outline" id="sellar">Sellar</button>'
+        : '<a class="outline" href="' + D.esc(back) + '">Sellar</a>';
+    }
     if (dial) actions += '<a class="outline" href="tel:' + D.esc(dial) + '">Llamar</a>';
-    actions += '<a class="outline" href="' + accountHref + '">Seguir</a>';
+    actions += session
+      ? '<button type="button" class="outline" id="seguir">Seguir</button>'
+      : '<a class="outline" href="' + D.esc(back) + '">Seguir</a>';
     var address = row.address || "Dirección no publicada.";
     if (row.coords_approximate && row.address) address += " La posición del mapa es aproximada.";
     var cover = photo
@@ -75,6 +81,7 @@
       "<p class=\"zone\">" + D.esc(place) + "</p>" +
       "<p class=\"status-line " + statusClass + "\">" + D.esc(statusText) + "</p>" +
       (actions ? '<div class="actions">' + actions + "</div>" : "") +
+      '<p class="soft" id="accion-nota"></p>' +
       "</section>" +
       "<section class=\"block\"><h2>Horario de la semana</h2>" + D.hoursHtml(row) +
       (row.closed_note ? "<p class=\"soft\">" + D.esc(row.closed_note) + "</p>" : "") +
@@ -86,6 +93,37 @@
       D.esc(food.length ? "Tapas: " + food.join(", ") : "Sin tapas publicadas.") + "</p></section>" +
       (row.description ? "<section class=\"block\"><h2>La casa</h2><p>" + D.esc(row.description) + "</p></section>" : "") +
       "<div class=\"mini-map\" id=\"mapa-ficha\"></div>";
+    var nota = document.getElementById("accion-nota");
+    var seguir = document.getElementById("seguir");
+    var sellar = document.getElementById("sellar");
+    function notaText(text) { if (nota) nota.textContent = text || ""; }
+    if (seguir && S) {
+      S.isFollowing(row.id).then(function (on) {
+        seguir.textContent = on ? "Siguiendo" : "Seguir";
+        seguir.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      seguir.addEventListener("click", function () {
+        var on = seguir.getAttribute("aria-pressed") === "true";
+        seguir.disabled = true;
+        S.setFollow(row.id, !on).then(function (result) {
+          seguir.disabled = false;
+          if (!result.ok) return notaText(result.message);
+          seguir.textContent = on ? "Seguir" : "Siguiendo";
+          seguir.setAttribute("aria-pressed", on ? "false" : "true");
+          notaText(on ? "Has dejado de seguir esta casa." : "Sigues esta casa.");
+        });
+      });
+    }
+    if (sellar && S) {
+      sellar.addEventListener("click", function () {
+        sellar.disabled = true;
+        notaText("Comprobando que estás cerca de la casa…");
+        S.seal(row.id).then(function (result) {
+          sellar.disabled = false;
+          notaText(result.message);
+        });
+      });
+    }
     if (row.lat != null && row.lng != null) {
       var map = L.map("mapa-ficha", { scrollWheelZoom: false }).setView([row.lat, row.lng], 14);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {

@@ -1,5 +1,7 @@
 (function (global) {
   var KEY = "sb-fwfwfbtzarmwalfaxelh-auth-token";
+  var SUPABASE = "https://fwfwfbtzarmwalfaxelh.supabase.co";
+  var ANON = "sb_publishable_uyool6N2lYnDmZ1cmcK8TQ_WmtMRdlU";
 
   function esc(value) {
     return String(value == null ? "" : value)
@@ -24,8 +26,7 @@
     var parts = token.split(".");
     if (parts.length < 2) return 0;
     try {
-      var json = atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"));
-      var payload = JSON.parse(json);
+      var payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
       return Number(payload.exp) || 0;
     } catch (err) {
       return 0;
@@ -46,6 +47,13 @@
     }
   }
 
+  function save(session) {
+    if (!session.expires_at && session.expires_in) {
+      session.expires_at = Math.round(Date.now() / 1000) + Number(session.expires_in);
+    }
+    localStorage.setItem(KEY, JSON.stringify(session));
+  }
+
   function displayName(user) {
     var meta = (user && user.user_metadata) || {};
     var name = meta.full_name || meta.name || "";
@@ -53,31 +61,199 @@
     return String(name || "").trim();
   }
 
-  function avatarUrl(user) {
-    var meta = (user && user.user_metadata) || {};
-    var url = meta.avatar_url || meta.picture || "";
-    if (typeof url !== "string" || url.indexOf("https://") !== 0) return "";
-    return url;
+  function safeNext(value) {
+    if (!value || value.charAt(0) !== "/" || value.indexOf("//") === 0 || value.indexOf("/\\") === 0) return "/";
+    if (value.indexOf("/entrar") === 0 || value.indexOf("/app") === 0) return "/";
+    return value;
+  }
+
+  function here() {
+    var next = location.pathname + location.search;
+    return safeNext(next);
+  }
+
+  function loginHref() {
+    return "/entrar/?next=" + encodeURIComponent(here());
+  }
+
+  function authHeaders(session, json) {
+    var headers = {
+      apikey: ANON,
+      Authorization: "Bearer " + session.access_token
+    };
+    if (json) headers["Content-Type"] = "application/json";
+    return headers;
+  }
+
+  function publicError(message) {
+    var text = String(message || "");
+    if (/\d{8}[A-Za-z]/.test(text) || /\+?\d[\d\s]{8,}/.test(text)) return "No se ha podido completar.";
+    return text || "No se ha podido completar.";
+  }
+
+  function signIn(email, password) {
+    return fetch(SUPABASE + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: { apikey: ANON, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: String(email || "").trim().toLowerCase(), password: password || "" })
+    }).then(function (res) {
+      return res.json().then(function (body) {
+        if (!res.ok || !body || !body.access_token) {
+          var code = body && (body.error_description || body.msg || body.error || "");
+          if (/invalid/i.test(code)) return { ok: false, message: "El correo o la contraseña no coinciden." };
+          return { ok: false, message: "No se ha podido entrar. Revisa el correo y la contraseña." };
+        }
+        save(body);
+        return { ok: true };
+      });
+    }).catch(function () {
+      return { ok: false, message: "No hay conexión. Vuelve a intentarlo." };
+    });
+  }
+
+  function signOut() {
+    var session = read();
+    var finish = function () {
+      localStorage.removeItem(KEY);
+      location.reload();
+    };
+    if (!session) return finish();
+    fetch(SUPABASE + "/auth/v1/logout", {
+      method: "POST",
+      headers: authHeaders(session, true)
+    }).then(finish, finish);
+  }
+
+  function isFollowing(furanchoId) {
+    var session = read();
+    if (!session) return Promise.resolve(false);
+    var url = SUPABASE + "/rest/v1/house_follows?select=furancho_id&user_id=eq." +
+      encodeURIComponent(session.user.id) + "&furancho_id=eq." + encodeURIComponent(furanchoId);
+    return fetch(url, { headers: authHeaders(session, false) }).then(function (res) {
+      if (!res.ok) return false;
+      return res.json().then(function (rows) { return Array.isArray(rows) && rows.length > 0; });
+    }).catch(function () { return false; });
+  }
+
+  function setFollow(furanchoId, follow) {
+    var session = read();
+    if (!session) return Promise.resolve({ ok: false, message: "Entra para seguir la casa." });
+    var headers = authHeaders(session, true);
+    if (follow) {
+      headers.Prefer = "return=minimal";
+      return fetch(SUPABASE + "/rest/v1/house_follows", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ user_id: session.user.id, furancho_id: furanchoId })
+      }).then(function (res) {
+        if (res.ok || res.status === 409) return { ok: true };
+        return res.json().then(function (body) {
+          var message = body && body.message || "";
+          if (/duplicate|23505/i.test(message)) return { ok: true };
+          return { ok: false, message: publicError(message) };
+        }).catch(function () { return { ok: false, message: "No se ha podido seguir la casa." }; });
+      });
+    }
+    var url = SUPABASE + "/rest/v1/house_follows?user_id=eq." + encodeURIComponent(session.user.id) +
+      "&furancho_id=eq." + encodeURIComponent(furanchoId);
+    return fetch(url, { method: "DELETE", headers: authHeaders(session, false) }).then(function (res) {
+      if (res.ok) return { ok: true };
+      return { ok: false, message: "No se ha podido dejar de seguir." };
+    });
+  }
+
+  function seal(furanchoId) {
+    var session = read();
+    if (!session) return Promise.resolve({ ok: false, message: "Entra para sellar el pasaporte." });
+    if (!navigator.geolocation) {
+      return Promise.resolve({ ok: false, message: "Este navegador no da la ubicación. Sin ella no se sella." });
+    }
+    return new Promise(function (resolve) {
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        fetch(SUPABASE + "/rest/v1/rpc/seal_passport", {
+          method: "POST",
+          headers: authHeaders(session, true),
+          body: JSON.stringify({
+            p_furancho_id: furanchoId,
+            p_lat: pos.coords.latitude,
+            p_lng: pos.coords.longitude,
+            p_accuracy: pos.coords.accuracy
+          })
+        }).then(function (res) {
+          if (res.ok) return resolve({ ok: true, message: "Sello de hoy en el pasaporte." });
+          return res.json().then(function (body) {
+            resolve({ ok: false, message: publicError(body && (body.message || body.hint)) });
+          }).catch(function () {
+            resolve({ ok: false, message: "No se ha podido sellar." });
+          });
+        }).catch(function () {
+          resolve({ ok: false, message: "No hay conexión. Vuelve a intentarlo." });
+        });
+      }, function () {
+        resolve({ ok: false, message: "El sello pide permiso de ubicación, cerca de la casa." });
+      }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+    });
   }
 
   function userHtml(session) {
-    var person = displayName(session.user);
-    var letter = (person || "R").charAt(0).toLocaleUpperCase("es");
-    var photo = avatarUrl(session.user);
-    var face = photo ? '<img alt="" src="' + esc(photo) + '">' : esc(letter);
-    var aria = person ? "Abrir app, " + person : "Abrir app";
-    return '<a class="account__user" href="/app/" aria-label="' + esc(aria) + '">' +
-      '<span class="account__avatar" aria-hidden="true">' + face + "</span>" +
-      "<span>Abrir app</span></a>";
+    var person = displayName(session.user) || "Tu cuenta";
+    var letter = person.charAt(0).toLocaleUpperCase("es");
+    return '<div class="account__menu">' +
+      '<button type="button" class="account__user" aria-expanded="false" aria-haspopup="true">' +
+      '<span class="account__avatar" aria-hidden="true">' + esc(letter) + "</span>" +
+      "<span>" + esc(person) + "</span></button>" +
+      '<div class="account__panel" hidden>' +
+      '<a href="/perfil/">Mi perfil</a>' +
+      '<a href="/app/">Abrir app</a>' +
+      '<button type="button" data-logout>Cerrar sesión</button>' +
+      "</div></div>";
+  }
+
+  function closeMenus(except) {
+    var panels = document.querySelectorAll(".account__panel");
+    for (var i = 0; i < panels.length; i++) {
+      if (panels[i] === except) continue;
+      panels[i].hidden = true;
+      var button = panels[i].parentNode && panels[i].parentNode.querySelector(".account__user");
+      if (button) button.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function bindMenus() {
+    var buttons = document.querySelectorAll(".account__menu .account__user");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].addEventListener("click", function (event) {
+        event.stopPropagation();
+        var panel = this.parentNode.querySelector(".account__panel");
+        var open = panel.hidden;
+        closeMenus(open ? panel : null);
+        panel.hidden = !open;
+        this.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
+    var exits = document.querySelectorAll("[data-logout]");
+    for (var j = 0; j < exits.length; j++) {
+      exits[j].addEventListener("click", function () { signOut(); });
+    }
   }
 
   function paint() {
     var session = read();
-    if (!session) return;
-    var html = userHtml(session);
     var boxes = document.querySelectorAll("[data-sesion]");
-    for (var i = 0; i < boxes.length; i++) boxes[i].innerHTML = html;
+    for (var i = 0; i < boxes.length; i++) {
+      if (session) boxes[i].innerHTML = userHtml(session);
+      else {
+        var link = boxes[i].querySelector(".login-link");
+        if (link) link.setAttribute("href", loginHref());
+      }
+    }
+    if (session) bindMenus();
   }
+
+  document.addEventListener("click", function () { closeMenus(null); });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") closeMenus(null);
+  });
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", paint);
   else paint();
@@ -85,8 +261,12 @@
   global.RecunchosSesion = {
     read: read,
     displayName: displayName,
-    login: "/app/elegir",
-    register: "/app/registro",
-    home: "/app/"
+    safeNext: safeNext,
+    loginHref: loginHref,
+    signIn: signIn,
+    signOut: signOut,
+    isFollowing: isFollowing,
+    setFollow: setFollow,
+    seal: seal
   };
 })(window);
