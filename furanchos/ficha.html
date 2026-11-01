@@ -48,6 +48,11 @@
     var wines = D.listText(row.wine_types);
     var food = D.listText(row.food).concat(D.listText(row.menu));
     var maps = D.mapsUrl(row);
+    var dial = D.dialablePhone(row.phone);
+    var phoneLine = row.phone ? D.formatPhone(row.phone) : "Teléfono no indicado.";
+    var actions = "";
+    if (maps) actions += '<a href="' + D.esc(maps) + '" rel="noopener">Cómo llegar</a>';
+    if (dial) actions += '<a class="outline" href="tel:' + D.esc(dial) + '">Llamar</a>';
     var address = row.address || "Dirección no publicada.";
     if (row.coords_approximate && row.address) address += " La posición del mapa es aproximada.";
     var cover = photo
@@ -59,13 +64,13 @@
       "<h2 style=\"font-size:1.8rem\">" + D.esc(row.name) + "</h2>" +
       "<p class=\"zone\">" + D.esc(place) + "</p>" +
       "<p class=\"status-line " + statusClass + "\">" + D.esc(statusText) + "</p>" +
-      (maps ? '<div class="actions"><a href="' + D.esc(maps) + '" rel="noopener">Cómo llegar</a></div>' : "") +
+      (actions ? '<div class="actions">' + actions + "</div>" : "") +
       "</section>" +
       "<section class=\"block\"><h2>Horario de la semana</h2>" + D.hoursHtml(row) +
       (row.closed_note ? "<p class=\"soft\">" + D.esc(row.closed_note) + "</p>" : "") +
       (row.season_label ? "<p class=\"soft\">Temporada: " + D.esc(row.season_label) + "</p>" : "") +
       "</section>" +
-      "<section class=\"block\"><h2>Dirección</h2><p>" + D.esc(address) + "</p></section>" +
+      "<section class=\"block\"><h2>Dirección</h2><p>" + D.esc(address) + "</p><p class=\"soft\">" + D.esc(phoneLine) + "</p></section>" +
       "<section class=\"block\"><h2>Vinos y tapas</h2><p>" +
       D.esc(wines.length ? "Vinos: " + wines.join(", ") : "Sin vinos publicados.") + "</p><p class=\"soft\">" +
       D.esc(food.length ? "Tapas: " + food.join(", ") : "Sin tapas publicadas.") + "</p></section>" +

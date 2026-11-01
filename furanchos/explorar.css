@@ -114,8 +114,9 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:0;mar
 .actions{display:flex;gap:8px}
 .actions a{
   flex:1;text-align:center;text-decoration:none;background:var(--primary);color:#fff;
-  border-radius:14px;padding:12px 10px;font-weight:600;min-height:46px;
+  border:1px solid var(--primary);border-radius:14px;padding:12px 10px;font-weight:600;min-height:46px;
 }
+.actions a.outline{background:transparent;color:var(--primary)}
 .block{
   background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;
 }

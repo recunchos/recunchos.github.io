@@ -5,7 +5,8 @@
     "id", "name", "municipality", "comarca", "province", "address",
     "lat", "lng", "coords_approximate", "description", "wine_types", "food",
     "menu", "hours", "hours_note", "season_label", "today_status",
-    "today_status_on", "closed", "closed_note", "cover_photo_id", "local_type_label"
+    "today_status_on", "closed", "closed_note", "cover_photo_id", "local_type_label",
+    "phone"
   ].join(",");
 
   function esc(value) {
@@ -47,6 +48,19 @@
     if (/^https?:\/\//.test(id)) return id;
     if (id.indexOf("/") === -1 && id.indexOf(".") === -1) return "";
     return SUPABASE + "/storage/v1/object/public/visit-media/" + id.replace(/^\//, "");
+  }
+
+  function formatPhone(value) {
+    return String(value || "").split("/").map(function (part) {
+      var digits = part.replace(/\D/g, "");
+      if (digits.length === 9) return digits.slice(0, 3) + " " + digits.slice(3, 6) + " " + digits.slice(6);
+      return part.trim();
+    }).filter(Boolean).join(" / ");
+  }
+
+  function dialablePhone(value) {
+    var first = String(value || "").split(/[/,;]/)[0] || "";
+    return first.replace(/[^\d+]/g, "");
   }
 
   function mapsUrl(row) {
@@ -118,6 +132,8 @@
     listText: listText,
     statusLabel: statusLabel,
     photoUrl: photoUrl,
+    formatPhone: formatPhone,
+    dialablePhone: dialablePhone,
     mapsUrl: mapsUrl,
     hoursHtml: hoursHtml,
     todayHours: todayHours,
