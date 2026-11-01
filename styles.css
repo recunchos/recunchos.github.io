@@ -85,6 +85,7 @@ p{margin:0}
 }
 .account__ghost:hover{background:var(--tint);color:var(--primary)}
 .login-link,.account__user{background:var(--primary);color:var(--primary-ink);border:1px solid var(--primary)}
+.account__user{min-height:34px;padding:4px 10px 4px 4px;font-size:.82rem;gap:6px}
 .login-link:hover,.account__user:hover{color:var(--primary-ink);background:#17496C}
 .account__avatar{
   width:28px;height:28px;border-radius:50%;overflow:hidden;background:#17496C;color:#fff;

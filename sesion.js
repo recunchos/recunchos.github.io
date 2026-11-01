@@ -65,10 +65,10 @@
     var letter = (person || "R").charAt(0).toLocaleUpperCase("es");
     var photo = avatarUrl(session.user);
     var face = photo ? '<img alt="" src="' + esc(photo) + '">' : esc(letter);
-    var aria = person ? "Abrir Recunchos, " + person : "Abrir Recunchos";
+    var aria = person ? "Abrir app, " + person : "Abrir app";
     return '<a class="account__user" href="/app/" aria-label="' + esc(aria) + '">' +
       '<span class="account__avatar" aria-hidden="true">' + face + "</span>" +
-      "<span>Abrir Recunchos</span></a>";
+      "<span>Abrir app</span></a>";
   }
 
   function paint() {
