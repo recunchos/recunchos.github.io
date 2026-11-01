@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
+<script src="/frame-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mi perfil — Recunchos</title>
 <meta name="theme-color" content="#F3F8FA">
@@ -45,18 +47,7 @@
   </div>
 </footer>
 <script src="/sesion.js"></script>
-<script>
-(function () {
-  var S = window.RecunchosSesion;
-  var session = S.read();
-  if (!session) {
-    location.replace("/entrar/?next=" + encodeURIComponent("/perfil/"));
-    return;
-  }
-  var name = S.displayName(session.user) || "Tu cuenta";
-  document.getElementById("nombre").textContent = name;
-  document.getElementById("correo").textContent = session.user.email || "";
-})();
-</script>
+<script src="/perfil/perfil.js"></script>
+
 </body>
 </html>

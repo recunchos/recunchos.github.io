@@ -47,6 +47,34 @@
     }
   }
 
+  function clear() {
+    try { localStorage.removeItem(KEY); } catch (err) { /* ignore */ }
+  }
+
+  function verify() {
+    var session = read();
+    if (!session) return Promise.resolve(null);
+    return fetch(SUPABASE + "/auth/v1/user", {
+      headers: { apikey: ANON, Authorization: "Bearer " + session.access_token }
+    }).then(function (res) {
+      if (res.status === 401 || res.status === 403) {
+        clear();
+        return null;
+      }
+      if (!res.ok) return null;
+      return res.json().then(function (user) {
+        if (!user || !user.id) {
+          clear();
+          return null;
+        }
+        session.user = user;
+        return session;
+      });
+    }).catch(function () {
+      return null;
+    });
+  }
+
   function save(session) {
     if (!session.expires_at && session.expires_in) {
       session.expires_at = Math.round(Date.now() / 1000) + Number(session.expires_in);
@@ -62,9 +90,24 @@
   }
 
   function safeNext(value) {
-    if (!value || value.charAt(0) !== "/" || value.indexOf("//") === 0 || value.indexOf("/\\") === 0) return "/";
-    if (value.indexOf("/entrar") === 0 || value.indexOf("/app") === 0) return "/";
-    return value;
+    if (typeof value !== "string" || !value) return "/";
+    var i;
+    for (i = 0; i < value.length; i++) {
+      if (value.charCodeAt(i) < 32 || value.charAt(i) === "\\") return "/";
+    }
+    if (value.charAt(0) !== "/" || value.charAt(1) === "/") return "/";
+    try {
+      var resolved = new URL(value, location.origin);
+      if (resolved.origin !== location.origin) return "/";
+      var path = resolved.pathname + resolved.search + resolved.hash;
+      for (i = 0; i < path.length; i++) {
+        if (path.charCodeAt(i) < 32 || path.charAt(i) === "\\") return "/";
+      }
+      if (!resolved.pathname || resolved.pathname.charAt(0) !== "/" || resolved.pathname.charAt(1) === "/") return "/";
+      return path;
+    } catch (err) {
+      return "/";
+    }
   }
 
   function here() {
@@ -344,18 +387,19 @@
   }
 
   function paint() {
-    var session = read();
-    var boxes = document.querySelectorAll("[data-sesion]");
-    for (var i = 0; i < boxes.length; i++) {
-      if (session) boxes[i].innerHTML = userHtml(session);
-      else {
-        var link = boxes[i].querySelector(".login-link");
-        if (link) link.setAttribute("href", loginHref());
-        var create = boxes[i].querySelector(".account__ghost");
-        if (create) create.setAttribute("href", registerHref());
+    verify().then(function (session) {
+      var boxes = document.querySelectorAll("[data-sesion]");
+      for (var i = 0; i < boxes.length; i++) {
+        if (session) boxes[i].innerHTML = userHtml(session);
+        else {
+          var link = boxes[i].querySelector(".login-link");
+          if (link) link.setAttribute("href", loginHref());
+          var create = boxes[i].querySelector(".account__ghost");
+          if (create) create.setAttribute("href", registerHref());
+        }
       }
-    }
-    if (session) bindMenus();
+      if (session) bindMenus();
+    });
   }
 
   document.addEventListener("click", function () { closeMenus(null); });
@@ -368,6 +412,7 @@
 
   global.RecunchosSesion = {
     read: read,
+    verify: verify,
     displayName: displayName,
     safeNext: safeNext,
     loginHref: loginHref,
