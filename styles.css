@@ -122,6 +122,10 @@ p{margin:0}
 .auth .kinds label{font-weight:600;margin:6px 0}
 .auth .check{display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:12px 0}
 .auth .check input{width:auto;margin-top:4px}
+.auth .datos{margin:8px 0 0;color:var(--text);font-size:.92rem;line-height:1.45}
+.auth .datos h2{font-family:var(--sans);font-size:1rem;letter-spacing:0;margin:0 0 8px}
+.auth .datos ul{margin:0;padding-left:1.15rem}
+.auth .datos li{margin:6px 0}
 .auth button:disabled{opacity:.55}
 .login-link:hover,.account__user:hover{color:var(--primary-ink);background:#17496C}
 .account__avatar{
@@ -188,6 +192,11 @@ p{margin:0}
 }
 .section .narrow{margin-left:auto;margin-right:auto}
 .lead{font-size:clamp(1.02rem,2.4vw,1.125rem);color:var(--text)}
+.baja h2{margin-bottom:12px}
+.baja h3{font-family:var(--sans);font-size:1.15rem;letter-spacing:0;margin:28px 0 8px;color:var(--text)}
+.baja ol{margin:8px 0 0;padding-left:1.25rem}
+.baja li{margin:8px 0}
+.baja .lead{margin-top:8px}
 .kicker{
   font-family:var(--serif);color:var(--primary);
   font-size:clamp(1.05rem,2.8vw,1.25rem);font-weight:600;
