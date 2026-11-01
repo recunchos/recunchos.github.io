@@ -79,6 +79,7 @@
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
   var layer = L.layerGroup().addTo(map);
+  var lastBounds = [];
   map.setView([42.5, -8.4], 8);
 
   function pin(row) {
@@ -132,6 +133,7 @@
 
     layer.clearLayers();
     var bounds = [];
+    lastBounds = bounds;
     items.forEach(function (row) {
       if (row.lat == null || row.lng == null) return;
       var marker = L.marker([row.lat, row.lng], { icon: pin(row) }).addTo(layer);
@@ -149,7 +151,10 @@
     stage.className = "stage mode-" + next;
     document.getElementById("modo-lista").setAttribute("aria-pressed", next === "lista" ? "true" : "false");
     document.getElementById("modo-mapa").setAttribute("aria-pressed", next === "mapa" ? "true" : "false");
-    setTimeout(function () { map.invalidateSize(); }, 80);
+    setTimeout(function () {
+      map.invalidateSize();
+      if (lastBounds.length) map.fitBounds(lastBounds, { padding: [24, 24], maxZoom: 12 });
+    }, 80);
   }
 
   function fillConcellos() {
