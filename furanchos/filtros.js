@@ -57,13 +57,64 @@
     if (!next) return "";
     return next > plusDays(today, 16) ? "" : next;
   }
-  function openNow(row, today) {
-    if (row.today_status && String(row.today_status_on || "").slice(0, 10) === today) {
-      if (row.today_status === "cerrado") return false;
-      if (row.today_status === "abierto" || row.today_status === "abrimos") return true;
+  function minutesOf(value) {
+    var parts = String(value || "").split(":");
+    if (parts.length < 2) return null;
+    var hours = Number(parts[0]);
+    var mins = Number(parts[1]);
+    if (!Number.isFinite(hours) || !Number.isFinite(mins)) return null;
+    return hours * 60 + mins;
+  }
+  function slotOpen(slot, weekday, minutes) {
+    if (!slot || !Array.isArray(slot.days) || slot.open == null || slot.close == null) return false;
+    var open = minutesOf(slot.open);
+    var close = minutesOf(slot.close);
+    if (open == null || close == null) return false;
+    if (close > open) return slot.days.indexOf(weekday) !== -1 && minutes >= open && minutes < close;
+    if (slot.days.indexOf(weekday) !== -1 && minutes >= open) return true;
+    return slot.days.indexOf((weekday + 6) % 7) !== -1 && minutes < close;
+  }
+  function openState(row, clock) {
+    var stamp = String(row.today_status_on || "").slice(0, 10);
+    if (row.today_status && stamp === clock.date) {
+      if (row.today_status === "cerrado") return "shut";
+      if (row.today_status === "abierto" || row.today_status === "abrimos") return "open";
     }
-    if (row.closed || row.listed_year) return false;
-    return false;
+    if (row.closed === true) return "shut";
+    var slots = Array.isArray(row.hours) ? row.hours : [];
+    var usable = slots.some(function (slot) { return slot && Array.isArray(slot.days) && slot.open && slot.close; });
+    if (!usable) return "unknown";
+    if (row.opens_on && row.opens_on > clock.date) return "shut";
+    if (row.season_start && row.season_end && !inSeason(row, clock.date)) return "shut";
+    return slots.some(function (slot) { return slotOpen(slot, clock.weekday, clock.minutes); }) ? "open" : "shut";
+  }
+  function clockFrom(date) {
+    var fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Madrid",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    });
+    var parts = {};
+    fmt.formatToParts(date).forEach(function (part) { parts[part.type] = part.value; });
+    var days = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return {
+      date: parts.year + "-" + parts.month + "-" + parts.day,
+      weekday: days[parts.weekday],
+      minutes: Number(parts.hour) * 60 + Number(parts.minute)
+    };
+  }
+  function priceLevel(row) {
+    var level = Number(row.price_level);
+    if (row.price_level == null || (level !== 1 && level !== 2 && level !== 3)) return null;
+    return level;
+  }
+  function ratingKnown(row) {
+    return Number(row.review_count) > 0;
   }
   function distanceKm(a, b) {
     if (a.lat == null || a.lng == null || b.lat == null || b.lng == null) return Infinity;
@@ -77,22 +128,75 @@
   function list(value) {
     return Array.isArray(value) ? value : [];
   }
-  function matches(row, filters, today, origin) {
+  function baseMatch(row, filters, clock, origin) {
     if (filters.province !== "all" && row.province !== filters.province) return false;
     if (filters.zone !== "all" && zoneFor(row.municipality) !== filters.zone) return false;
     if (filters.wine !== "all" && list(row.wine_types).indexOf(filters.wine) === -1) return false;
     if (filters.food !== "all" && list(row.food).indexOf(filters.food) === -1) return false;
-    if (filters.maxPrice && (row.price_level == null || Number(row.price_level) > filters.maxPrice)) return false;
-    if (filters.minRating && Number(row.rating || 0) < filters.minRating) return false;
-    if (filters.openNow && !openNow(row, today)) return false;
-    if (filters.opensSoon && !announcedOpen(row, today)) return false;
-    if (filters.inSeason && !inSeason(row, today)) return false;
+    if (filters.opensSoon && !announcedOpen(row, clock.date)) return false;
     if (filters.radiusKm != null && origin && distanceKm(origin, row) > filters.radiusKm) return false;
     var text = String(filters.text || "").trim().toLowerCase();
     if (!text) return true;
     var hay = [row.name, row.municipality, row.comarca, zoneFor(row.municipality), row.province, row.address]
       .concat(list(row.wine_types), list(row.food)).join(" ").toLowerCase();
     return hay.indexOf(text) !== -1;
+  }
+  function verdict(row, filters, clock, origin) {
+    if (!baseMatch(row, filters, clock, origin)) return "out";
+    var unknown = false;
+    if (filters.maxPrice) {
+      var level = priceLevel(row);
+      if (level == null) unknown = true;
+      else if (level > filters.maxPrice) return "reject";
+    }
+    if (filters.minRating) {
+      if (!ratingKnown(row)) unknown = true;
+      else if (Number(row.rating) < filters.minRating) return "reject";
+    }
+    if (filters.openNow) {
+      var state = openState(row, clock);
+      if (state === "unknown") unknown = true;
+      else if (state !== "open") return "reject";
+    }
+    if (filters.inSeason) {
+      if (!row.season_start || !row.season_end) unknown = true;
+      else if (!inSeason(row, clock.date)) return "reject";
+    }
+    return unknown ? "unknown" : "match";
+  }
+  function outcome(rows, filters, clock, origin) {
+    var matched = [];
+    var unknown = 0;
+    var rejected = 0;
+    rows.forEach(function (row) {
+      var kind = verdict(row, filters, clock, origin);
+      if (kind === "match") matched.push(row);
+      else if (kind === "unknown") unknown += 1;
+      else if (kind === "reject") rejected += 1;
+    });
+    var gap = [];
+    if (filters.maxPrice) gap.push("price");
+    if (filters.minRating) gap.push("rating");
+    if (filters.openNow) gap.push("hours");
+    if (filters.inSeason) gap.push("season");
+    var code = "ok";
+    if (!matched.length) {
+      var ourenseMissing = filters.province === "Ourense" && rows.every(function (row) { return row.province !== "Ourense"; });
+      if (ourenseMissing) code = "ourense";
+      else if (unknown > 0 && rejected === 0) code = "missing";
+      else if (unknown > 0) code = "emptyKnown";
+      else code = "empty";
+    } else if (unknown > 0) code = "partial";
+    return { rows: matched, code: code, unknown: unknown, rejected: rejected, gap: gap };
+  }
+  function coverage(rows, clock) {
+    return {
+      price: rows.some(function (row) { return priceLevel(row) != null; }),
+      rating: rows.some(ratingKnown),
+      openNow: rows.some(function (row) { return openState(row, clock) !== "unknown"; }),
+      season: rows.some(function (row) { return row.season_start && row.season_end; }),
+      pending: false
+    };
   }
   function sortRecommended(rows) {
     var counts = {};
@@ -133,7 +237,14 @@
     PONTEVEDRA: { lat: 42.431, lng: -8.6446, label: "Pontevedra" },
     zoneFor: zoneFor,
     madridDate: madridDate,
-    matches: matches,
+    matches: function (row, filters, today, origin) {
+      var clock = typeof today === "string" ? { date: today, weekday: 0, minutes: 0 } : today;
+      return verdict(row, filters, clock, origin) === "match";
+    },
+    outcome: outcome,
+    coverage: coverage,
+    openState: openState,
+    clockFrom: clockFrom,
     sortRecommended: sortRecommended,
     sortDistance: sortDistance,
     zonesIn: zonesIn,
