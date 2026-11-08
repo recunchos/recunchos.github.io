@@ -95,7 +95,7 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:0;mar
 }
 .filters{display:flex;gap:8px}
 .filter-label{margin:8px 0 0;font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--primary)}
-.filter-note,.datos-nota{margin:8px 0 0;color:#3A2A00;background:#FFF4D6;border:1px solid #8A5A00;border-radius:10px;padding:8px 10px}
+.filter-note{margin:8px 0 0;color:#3A2A00;background:#FFF4D6;border:1px solid #8A5A00;border-radius:10px;padding:8px 10px}
 .chiprow{display:flex;flex-wrap:wrap;gap:8px}
 .chip{min-height:44px;padding:8px 12px;border-radius:999px;border:1px solid var(--primary);background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
 .chip[aria-pressed="true"]{background:#1F5F8B;color:#fff}
