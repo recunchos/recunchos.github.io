@@ -236,21 +236,18 @@
           if (/invalid/i.test(raw) && /email/i.test(raw)) return fail("err.email");
           if (/already registered|already exists/i.test(raw)) return fail("err.exists");
           if (/rate limit|over_email_send/i.test(raw)) return fail("err.rate");
-          var shown = publicError(raw);
-          if (shown === tr("err.public")) return fail("err.signupFail");
-          return { ok: false, code: "", message: shown };
+          return fail("err.signupFail");
         }
-        var user = body.user || (body.data && body.data.user);
-        var session = body.session || (body.access_token ? body : null);
-        if (body.access_token) session = body;
-        var identities = user && user.identities;
-        if (user && Array.isArray(identities) && identities.length === 0) {
+        var user = signupUser(body);
+        var session = signupSession(body);
+        if (user && Array.isArray(user.identities) && user.identities.length === 0 && !session) {
           return fail("err.existsConfirm");
         }
-        if (!user) return fail("err.signupFail");
         if (!session || !session.access_token) {
+          if (!user) return fail("err.signupFail");
           return { ok: true, confirmEmail: true, code: "err.confirmEmail", message: tr("err.confirmEmail") };
         }
+        if (!session.user && user) session.user = user;
         save(session);
         return updateProfile(session, { name: name, municipality: municipality, accountKind: accountKind }).then(function (warning) {
           return { ok: true, confirmEmail: false, warning: warning, owner: accountKind === "propietario" };
@@ -259,6 +256,22 @@
     }).catch(function () {
       return fail("err.offline");
     });
+  }
+
+  function signupUser(body) {
+    if (!body || typeof body !== "object") return null;
+    if (body.user && body.user.id) return body.user;
+    if (body.data && body.data.user && body.data.user.id) return body.data.user;
+    if (body.id && !body.access_token && (body.email || body.aud || Array.isArray(body.identities))) return body;
+    return null;
+  }
+
+  function signupSession(body) {
+    if (!body || typeof body !== "object") return null;
+    if (body.access_token) return body;
+    if (body.session && body.session.access_token) return body.session;
+    if (body.data && body.data.session && body.data.session.access_token) return body.data.session;
+    return null;
   }
 
   function updateProfile(session, profile) {
@@ -436,10 +449,10 @@
     if (!clean.includes("@") || !clean.includes(".") || clean.charAt(0) === "@") {
       return Promise.resolve({ ok: false, code: "email" });
     }
-    return fetch(SUPABASE + "/auth/v1/recover", {
+    return fetch(SUPABASE + "/auth/v1/recover?redirect_to=" + encodeURIComponent(WEB_CONFIRM), {
       method: "POST",
       headers: { apikey: ANON, "Content-Type": "application/json" },
-      body: JSON.stringify({ email: clean, redirect_to: WEB_CONFIRM })
+      body: JSON.stringify({ email: clean })
     }).then(function (res) {
       if (res.ok) return { ok: true };
       return res.json().then(function (body) {
