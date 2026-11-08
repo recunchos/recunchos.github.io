@@ -159,6 +159,7 @@
     button.textContent = label;
     button.setAttribute("aria-pressed", "false");
     button.setAttribute("aria-disabled", "true");
+    button.setAttribute("aria-describedby", "filtros-off");
     return button;
   }
 
