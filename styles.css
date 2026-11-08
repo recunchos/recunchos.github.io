@@ -67,6 +67,12 @@ p{margin:0}
 .topbar__in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px}
 .brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text);flex-shrink:0}
 .brand__name{font-family:var(--serif);font-weight:700;letter-spacing:.08em;font-size:1.05rem;color:var(--primary)}
+.beta-chip{
+  display:inline-flex;align-items:center;min-height:28px;margin-left:4px;padding:2px 8px;
+  border:1px solid #B56A31;border-radius:999px;background:#fff;color:#8A4A1C;
+  font:700 .75rem/1 var(--sans);
+}
+.preview-line{margin:14px 0 0;max-width:40rem;color:#13293D;font:600 .98rem/1.45 var(--sans)}
 .topbar nav ul{display:flex;gap:2px;list-style:none;margin:0;padding:0}
 .topbar nav a{
   display:block;padding:8px 8px;color:var(--text);text-decoration:none;

@@ -8,6 +8,11 @@
 <title data-i18n="meta.home.title">Recunchos — Furanchos de Galicia: descubre, chega e sela</title>
 <meta name="description" data-i18n-content="meta.home.desc" content="App gratuíta para descubrir máis de 100 furanchos de Galicia, chegar cun toque, chamar á casa e selar o pasaporte furancheiro.">
 <link rel="canonical" href="https://recunchos.github.io/">
+<link rel="alternate" hreflang="gl" href="https://recunchos.github.io/?lang=gl">
+<link rel="alternate" hreflang="es" href="https://recunchos.github.io/?lang=es">
+<link rel="alternate" hreflang="eu" href="https://recunchos.github.io/?lang=eu">
+<link rel="alternate" hreflang="ca" href="https://recunchos.github.io/?lang=ca">
+<link rel="alternate" hreflang="x-default" href="https://recunchos.github.io/">
 <meta name="theme-color" content="#F3F8FA">
 <meta name="color-scheme" content="light">
 
@@ -44,6 +49,7 @@
       <img class="brand__mark" src="img/favicon-512.png" width="32" height="32" alt="">
       <span class="brand__name">Recunchos</span>
     </a>
+    <span class="beta-chip" data-i18n="beta.chip">Beta</span>
     <div class="topbar__end">
       <nav aria-label="Seccións" data-i18n-attr="aria-label:nav.sections">
         <ul>
@@ -70,7 +76,8 @@
            alt="Recunchos: erre color crema con media corona de laurel verde sobre terracota">
       <p class="hero__name">Recunchos</p>
       <h1 data-i18n="hero.h1">Segue o loureiro. Atopa o teu furancho.</h1>
-      <p class="hero__sub" data-i18n="hero.sub">Recunchos é a app gratuíta para ir de furanchos en Galicia: descubre onde está o loureiro, chega cun toque, chama á casa e sela o teu pasaporte furancheiro.</p>
+      <p class="hero__sub" data-i18n="hero.sub">Recunchos é a app gratuíta para ir de furanchos en Galicia: descobre onde está o loureiro, chega cun toque, chama á casa e sela o teu pasaporte furancheiro.</p>
+      <p class="preview-line" data-i18n="preview.line">Recunchos está en probas. Algunhas funcións aínda non están dispoñibles. Servizo para maiores de 18 anos.</p>
       <div class="stores">
         <button class="store" type="button" disabled>
           <span class="store__name">Google Play</span>
@@ -99,11 +106,11 @@
       <div class="scopes" role="group" data-i18n-attr="aria-label:scopes.label" aria-label="Furanchos e Por España">
         <a class="scope scope--furanchos" href="/furanchos/#galicia">
           <strong data-i18n="scopes.furanchos">Furanchos</strong>
-          <span data-i18n="scopes.furanchosDesc">Casas de Galicia no directorio publicado.</span>
+          <span data-i18n="scopes.furanchosDesc">Casas de Galicia no directorio. A ficha non certifica a autorización nin a apertura.</span>
         </a>
         <a class="scope scope--espana" href="/furanchos/#espana">
           <strong data-i18n="scopes.espana">Por España</strong>
-          <span data-i18n="scopes.espanaDesc">Establecementos tradicionais doutras comunidades, no mesmo directorio.</span>
+          <span data-i18n="scopes.espanaDesc">Outras comunidades, coa súa categoría. Non é un censo de toda España.</span>
         </a>
       </div>
       <ul class="cards">
@@ -139,7 +146,7 @@
               </svg>
             </span>
             <h3 data-i18n="card.stories.h">Feed, historias e perfís</h3>
-            <p data-i18n="card.stories.p">Comparte a tapa, a cunca e a sobremesa. Crea o teu perfil, publica historias e segue a outras persoas furancheiras. Para quen usa a app, as historias non teñen límite.</p>
+            <p data-i18n="card.stories.p">Na app hai historias e perfís para quen ten conta. Esta web non as mostra.</p>
             <a class="card__go" href="/historias.html" data-i18n="card.stories.go">Ver historias</a>
           </article>
         </li>
@@ -151,7 +158,7 @@
               </svg>
             </span>
             <h3 data-i18n="card.passport.h">Pasaporte furancheiro</h3>
-            <p data-i18n="card.passport.p">Cada visita suma un selo, validado por GPS cando estás a menos de 50 metros do furancho. Só conta se fuches de verdade.</p>
+            <p data-i18n="card.passport.p">Na app, o selo compróbase por GPS a menos de 50 metros. Esta páxina non sela nin mostra pasaportes.</p>
             <a class="card__go" href="/pasaporte.html" data-i18n="card.passport.go">Ver o pasaporte</a>
           </article>
         </li>
@@ -182,7 +189,7 @@
       <h2 id="t-propietarios" data-i18n="owners.title">Para propietarios</h2>
       <div class="narrow">
         <p class="kicker" data-i18n="owners.kicker">Toda a tempada, coa túa casa no mapa.</p>
-        <p class="lead" data-i18n="owners.lead">Recunchos achega o teu furancho á xente que o está buscando. É de balde para quen vai de furanchos e para quen ten a casa: non hai plans de pago, nin patrocinios, nin anuncios. «Abrimos hoy» é de balde para todos os titulares verificados.</p>
+        <p class="lead" data-i18n="owners.lead">É de balde: non hai plans de pago, nin patrocinios, nin anuncios. Acceso de propietarios: solicita a xestión da ficha da túa casa en holarecunchos@hotmail.com. Comprobar a titularidade non equivale a unha licenza nin a certificar a habilitación administrativa ou a apertura. Non envíes o DNI nin outros documentos persoais por correo.</p>
       </div>
       <p class="contact"><span data-i18n="owners.contact">Falamos? Escríbenos a</span> <a class="mail" href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a>.</p>
     </div>
@@ -214,7 +221,7 @@
         </details>
         <details>
           <summary data-i18n="faq.q6">Teño un furancho, como aparezo en Recunchos?</summary>
-          <p data-i18n="faq.a6">Escríbenos a holarecunchos@hotmail.com e contámosche como aparece a túa casa. É de balde.</p>
+          <p data-i18n="faq.a6">Escribe a holarecunchos@hotmail.com para solicitar a xestión da ficha. É de balde. Non envíes o DNI nin outros documentos persoais por correo, e non hai un prazo publicado de resposta.</p>
         </details>
       </div>
     </div>
