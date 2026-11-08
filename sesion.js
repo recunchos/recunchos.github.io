@@ -89,6 +89,8 @@
     return String(name || "").trim();
   }
 
+  var WEB_CONFIRM = "https://recunchos.github.io/confirmar/";
+
   function safeNext(value) {
     if (typeof value !== "string" || !value) return "/";
     var i;
@@ -108,6 +110,14 @@
     } catch (err) {
       return "/";
     }
+  }
+
+  function webNext(value) {
+    var path = safeNext(value);
+    var pathname = path.split("?")[0].split("#")[0];
+    if (pathname === "/app" || pathname.indexOf("/app/") === 0) return "/";
+    if (pathname === "/confirmar" || pathname.indexOf("/confirmar/") === 0) return "/";
+    return path.split("#")[0];
   }
 
   function here() {
@@ -194,7 +204,7 @@
     var idioma = global.RecunchosIdioma;
     var uiLang = idioma && idioma.lang ? idioma.lang() : "gl";
     var stamp = new Date().toISOString();
-    return fetch(SUPABASE + "/auth/v1/signup?redirect_to=" + encodeURIComponent("https://recunchos.github.io/app/"), {
+    return fetch(SUPABASE + "/auth/v1/signup?redirect_to=" + encodeURIComponent(WEB_CONFIRM), {
       method: "POST",
       headers: { apikey: ANON, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -213,7 +223,7 @@
           ui_language: uiLang,
           legal_shown: "es:v2.1.5"
         },
-        email_redirect_to: "https://recunchos.github.io/app/"
+        email_redirect_to: WEB_CONFIRM
       })
     }).then(function (res) {
       return res.json().then(function (body) {
@@ -359,6 +369,85 @@
     });
   }
 
+  function hashParams(hash) {
+    var raw = String(hash || "");
+    if (raw.charAt(0) === "#") raw = raw.slice(1);
+    return new URLSearchParams(raw);
+  }
+
+  function applyCallback(hash, search) {
+    var fromHash = hashParams(hash);
+    var fromQuery = new URLSearchParams(String(search || "").replace(/^\?/, ""));
+    history.replaceState(null, "", location.pathname);
+    var error = fromHash.get("error") || fromHash.get("error_code") || fromQuery.get("error") || fromQuery.get("error_code") || "";
+    if (error) return Promise.resolve({ ok: false, code: error });
+    var access = fromHash.get("access_token");
+    if (!access) {
+      if (fromQuery.get("code")) return Promise.resolve({ ok: false, code: "pkce_unsupported" });
+      return Promise.resolve({ ok: false, code: "missing" });
+    }
+    var session = {
+      access_token: access,
+      refresh_token: fromHash.get("refresh_token") || "",
+      expires_in: Number(fromHash.get("expires_in")) || 0,
+      token_type: fromHash.get("token_type") || "bearer"
+    };
+    var type = fromHash.get("type") || "";
+    return fetch(SUPABASE + "/auth/v1/user", {
+      headers: { apikey: ANON, Authorization: "Bearer " + access }
+    }).then(function (res) {
+      if (!res.ok) return { ok: false, code: "rejected" };
+      return res.json().then(function (user) {
+        if (!user || !user.id) return { ok: false, code: "rejected" };
+        session.user = user;
+        save(session);
+        return { ok: true, type: type };
+      });
+    }).catch(function () {
+      return { ok: false, code: "offline" };
+    });
+  }
+
+  function updatePassword(password) {
+    var problem = passwordProblem(password);
+    if (problem) return Promise.resolve({ ok: false, message: problem });
+    var session = read();
+    if (!session) return Promise.resolve({ ok: false, code: "rejected" });
+    return fetch(SUPABASE + "/auth/v1/user", {
+      method: "PUT",
+      headers: authHeaders(session, true),
+      body: JSON.stringify({ password: password })
+    }).then(function (res) {
+      if (!res.ok) return { ok: false, code: "rejected" };
+      return { ok: true };
+    }).catch(function () {
+      return { ok: false, code: "offline" };
+    });
+  }
+
+  function requestRecovery(email) {
+    var clean = String(email || "").trim().toLowerCase();
+    if (!clean.includes("@") || !clean.includes(".") || clean.charAt(0) === "@") {
+      return Promise.resolve({ ok: false, code: "email" });
+    }
+    return fetch(SUPABASE + "/auth/v1/recover", {
+      method: "POST",
+      headers: { apikey: ANON, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: clean, redirect_to: WEB_CONFIRM })
+    }).then(function (res) {
+      if (res.ok) return { ok: true };
+      return res.json().then(function (body) {
+        var raw = body && (body.msg || body.error_description || body.message) || "";
+        if (/rate limit|over_email_send/i.test(raw)) return { ok: false, code: "rate" };
+        return { ok: false, code: "rejected" };
+      }).catch(function () {
+        return { ok: false, code: "rejected" };
+      });
+    }).catch(function () {
+      return { ok: false, code: "offline" };
+    });
+  }
+
   function userHtml(session) {
     var person = displayName(session.user) || tr("account.you");
     var letter = person.charAt(0).toLocaleUpperCase("es");
@@ -437,6 +526,11 @@
     verify: verify,
     displayName: displayName,
     safeNext: safeNext,
+    webNext: webNext,
+    confirmUrl: WEB_CONFIRM,
+    applyCallback: applyCallback,
+    updatePassword: updatePassword,
+    requestRecovery: requestRecovery,
     loginHref: loginHref,
     signIn: signIn,
     signUp: signUp,

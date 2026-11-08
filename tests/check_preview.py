@@ -63,7 +63,16 @@ def main() -> None:
         assert f'"{lang}":{{' in bundled or f'"{lang}":{{' in bundled.replace(" ", "")
     assert bundled.count('"legal.notice"') == 4
     assert "24 horas" not in (ROOT / "index.html").read_text(encoding="utf-8").lower()
-    assert "location.assign(\"/app" not in (ROOT / "sesion.js").read_text(encoding="utf-8")
+    session = (ROOT / "sesion.js").read_text(encoding="utf-8")
+    assert 'location.assign("/app' not in session
+    assert "https://recunchos.github.io/confirmar/" in session
+    assert "email_redirect_to: WEB_CONFIRM" in session
+    assert "https://recunchos.github.io/app/" not in session
+    for name in pairs.values():
+        assert "Fecha de publicación" not in (ROOT / name).read_text(encoding="utf-8")
+    note = (ROOT / "legal-fuente/sincronizacion-web.txt").read_text(encoding="utf-8")
+    assert "pendiente de publicación" in note
+    assert "v2.1.5" in note
     print("preview checks ok")
 
 

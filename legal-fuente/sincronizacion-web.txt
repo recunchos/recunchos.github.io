@@ -1,0 +1,5 @@
+version_maestro: v2.1.5
+fecha_maestro: 2026-11-01
+origen_maestro: textos aprobados de la fuente v2.1.5, idénticos al cuerpo servido por /app/
+fecha_sincronizacion_web: pendiente de publicación
+nota: La fecha de sincronización se escribirá el día en que esta web se publique. No modifica el cuerpo ni la fecha de la v2.1.5, no declara una publicación ya hecha y no supone aceptación retroactiva. El borrador v2.1.6 sobre historias no tiene vigencia ni marca APROBADA y no forma parte de estos textos.

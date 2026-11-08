@@ -1,7 +1,7 @@
 (function () {
   var S = window.RecunchosSesion;
   var params = new URLSearchParams(location.search);
-  var next = S.safeNext(params.get("next"));
+  var next = S.webNext(params.get("next"));
   var create = document.querySelector(".links a[href='/crear-cuenta/']");
   if (create) create.href = "/crear-cuenta/?next=" + encodeURIComponent(next);
   var form = document.getElementById("form");

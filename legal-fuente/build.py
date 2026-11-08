@@ -2,6 +2,11 @@
 """Regenera el cuerpo público de los seis textos desde la fuente v2.1.5.
 
 No traduce. El cuerpo queda en castellano, que es el maestro aprobado.
+
+La versión y la fecha del maestro (v2.1.5, 1 de noviembre de 2026) no se reescriben.
+La fecha real de sincronización de la web se anota aparte, en
+legal-fuente/sincronizacion-web.txt, y solo cuando se publique.
+Este pie no afirma que la web ya se haya publicado ni una aceptación retroactiva.
 """
 from __future__ import annotations
 
@@ -172,7 +177,7 @@ SHELL = """<!doctype html>
   </div>
   <footer>
     <p><a class="site-legal" href="/legal.html" data-i18n="nav.legal">Legal</a> · <a class="site-legal" href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
-    <p class="legal-master" data-legal-master lang="es">Contacto: <a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a>. Fecha de publicación: 1 de noviembre de 2026.</p>
+    <p>Contacto: <a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
   </footer>
 </main>
 <script src="/i18n.js"></script>
