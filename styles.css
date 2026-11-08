@@ -395,11 +395,8 @@ p{margin:0}
   .hero{padding:28px 0 48px}
   .section{padding:88px 0}
 }
-.hero-lang{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px}
-.hero-lang__label{margin:0;font:800 .8rem/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#0E3A5A}
-.hero-lang .lang__btn{min-width:76px;min-height:48px;background:#fff;border-width:2px}
-.hero-lang .lang__btn[aria-pressed="true"]{outline:3px solid #F3C15A;outline-offset:2px}
-.hero-lang .lang__name{font-size:.8rem}
+.topbar .nav-lang{display:flex;align-items:center}
+.topbar .lang__toggle{font-size:.8125rem;font-weight:600;color:var(--text)}
 
 /* 404 */
 .notfound{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;padding:48px 20px}
