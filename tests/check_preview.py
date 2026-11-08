@@ -71,7 +71,8 @@ def main() -> None:
     for name in pairs.values():
         assert "Fecha de publicación" not in (ROOT / name).read_text(encoding="utf-8")
     note = (ROOT / "legal-fuente/sincronizacion-web.txt").read_text(encoding="utf-8")
-    assert "pendiente de publicación" in note
+    assert "fecha_sincronizacion_web: 2026-11-08" in note
+    assert "no modifica el cuerpo ni la fecha de la v2.1.5" in note
     assert "v2.1.5" in note
     print("preview checks ok")
 
