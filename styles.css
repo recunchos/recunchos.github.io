@@ -115,8 +115,9 @@ p{margin:0}
   background:var(--primary);color:var(--primary-ink);font-weight:700;cursor:pointer;
 }
 .auth .links{display:flex;justify-content:space-between;gap:12px;margin-top:16px;font-size:.92rem}
-.auth .err{color:#8A3B2A;margin-top:12px}
+.auth .err{color:#6B2418;margin-top:12px}
 .auth .ok{color:var(--success);margin-top:12px}
+.auth .links a{display:inline-flex;align-items:center;min-height:44px}
 .auth .hint,.auth .version{color:var(--muted);font-size:.85rem;margin:8px 0}
 .auth .kinds{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0}
 .auth .kinds label{font-weight:600;margin:6px 0}

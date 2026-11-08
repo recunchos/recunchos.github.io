@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="gl">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
 <script src="/frame-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Explorar — Recunchos</title>
+<title data-i18n="explore.title">Explorar — Recunchos</title>
+<link rel="stylesheet" href="/idioma.css">
 <meta name="description" content="Mapa y lista de furanchos publicados.">
 <link rel="canonical" href="https://recunchos.github.io/furanchos/">
 <meta name="theme-color" content="#F3F8FA">
@@ -14,58 +15,61 @@
 <link rel="stylesheet" href="explorar.css">
 </head>
 <body>
-<a class="skip" href="#lista">Saltar al listado</a>
+<a class="skip" href="#lista" data-i18n="skip">Saltar ao contido</a>
 <div class="explore region-galicia" id="explore">
   <header class="appbar">
-    <a class="back" href="/#funciones" aria-label="Volver a Funciones">←</a>
-    <h1>Explorar</h1>
+    <a class="back" href="/#funciones" data-i18n-attr="aria-label:explore.back" aria-label="Volver a Funcións">←</a>
+    <h1 data-i18n="explore.h">Explorar</h1>
+    <div data-lang-slot></div>
     <div class="appbar__account" data-sesion>
-      <a class="account__ghost" href="/crear-cuenta/">Crear cuenta</a>
-      <a class="login-link" href="/entrar/">Iniciar sesión</a>
+      <a class="account__ghost" href="/crear-cuenta/" data-i18n="account.create">Crear conta</a>
+      <a class="login-link" href="/entrar/" data-i18n="account.login">Iniciar sesión</a>
     </div>
   </header>
   <div class="tools">
-    <div class="modes region" role="tablist" aria-label="Ámbito">
-      <button type="button" id="tab-galicia" role="tab" aria-pressed="true">Furanchos de Galicia</button>
-      <button type="button" id="tab-espana" role="tab" aria-pressed="false">Por España</button>
+    <div class="modes region" role="tablist" data-i18n-attr="aria-label:explore.scope" aria-label="Ámbito">
+      <button type="button" id="tab-galicia" role="tab" aria-selected="true" aria-pressed="true" data-i18n="explore.tabFuranchos" data-i18n-attr="aria-label:explore.tabFuranchosLabel">Furanchos</button>
+      <button type="button" id="tab-espana" role="tab" aria-selected="false" aria-pressed="false" data-i18n="explore.tabSpain" data-i18n-attr="aria-label:explore.tabSpainLabel">Por España</button>
     </div>
     <div id="galicia-tools">
-      <p class="lead">Furanchos de Galicia, también fuera de temporada. Cada ficha dice de qué año son los datos y si siguen sin verificar.</p>
-      <label class="skip" for="q">Buscar</label>
-      <input class="search" id="q" type="search" placeholder="Buscar casa o concello" autocomplete="off">
+      <p class="lead" data-i18n="explore.leadGalicia">Furanchos de Galicia, tamén fóra de tempada. Cada ficha di de que ano son os datos e se seguen sen verificar.</p>
+      <label class="skip" for="q" data-i18n="explore.searchLabel">Buscar</label>
+      <input class="search" id="q" type="search" data-i18n-attr="placeholder:explore.searchPh" placeholder="Buscar casa ou concello" autocomplete="off">
       <div class="filters">
-        <label class="skip" for="concello">Concello</label>
-        <select id="concello"><option value="">Todos los concellos</option></select>
+        <label class="skip" for="concello" data-i18n="explore.townLabel">Concello</label>
+        <select id="concello"><option value="" data-i18n="explore.allTowns">Todos os concellos</option></select>
       </div>
-      <div class="modes vista" role="group" aria-label="Vista">
-        <button type="button" id="modo-lista" aria-pressed="true">Lista</button>
-        <button type="button" id="modo-mapa" aria-pressed="false">Mapa</button>
+      <div class="modes vista" role="group" data-i18n-attr="aria-label:explore.view" aria-label="Vista">
+        <button type="button" id="modo-lista" aria-pressed="true" data-i18n="explore.list">Lista</button>
+        <button type="button" id="modo-mapa" aria-pressed="false" data-i18n="explore.map">Mapa</button>
       </div>
-      <p class="count" id="como-llegar">En la ficha: dirección, teléfono, Cómo llegar, Llamar, vinos, tapas y horario si la casa lo publicó.</p>
+      <p class="count" id="como-llegar" data-i18n="explore.arriveNote">Na ficha: enderezo, teléfono, Como chegar, Chamar, viños, tapas e horario se a casa o publicou.</p>
     </div>
   </div>
   <section class="spain" id="espana">
-    <p class="lead">Casas parecidas al furancho en otras comunidades. Galicia sigue en su pestaña. Estas fichas están en revisión y salen de fuentes públicas.</p>
+    <p class="lead" data-i18n="explore.leadSpain">Casas parecidas ao furancho noutras comunidades. Galicia segue na súa pestana. Estas fichas están en revisión e saen de fontes públicas.</p>
     <div id="comunidades"></div>
   </section>
   <div class="community-head" id="community-head">
-    <button type="button" class="back-link" id="volver">← Por España</button>
+    <button type="button" class="back-link" id="volver" data-i18n="explore.backSpain">← Por España</button>
     <h2 id="community-name"></h2>
     <p class="local" id="community-local"></p>
     <p class="intro" id="community-intro"></p>
   </div>
   <div class="stage mode-lista" id="stage">
-    <div class="map-pane" id="mapa" role="region" aria-label="Mapa de furanchos"></div>
+    <div class="map-pane" id="mapa" role="region" data-i18n-attr="aria-label:map.label" aria-label="Mapa de furanchos"></div>
     <div class="list-pane">
-      <p class="count" id="estado">Cargando furanchos…</p>
+      <p class="count" id="estado" data-i18n="explore.loading">Cargando furanchos…</p>
       <ul class="rows" id="lista"></ul>
     </div>
   </div>
 </div>
 <footer class="foot">
-  <p>Si vas de furanchos, que conduzca alguien que no beba.</p>
-  <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html">Legal</a> · <a href="/eliminar-cuenta.html">Eliminar cuenta</a></p>
+  <p data-i18n="footer.note">Se vas de furanchos, que conduza alguén que non beba.</p>
+  <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html" data-i18n="nav.legal">Legal</a> · <a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
 </footer>
+<script src="/i18n.js"></script>
+<script src="/idioma.js"></script>
 <script src="/sesion.js"></script>
 <script src="vendor/leaflet.js"></script>
 <script src="datos.js"></script>

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="gl">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
 <script src="/frame-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Legal — Recunchos</title>
-<meta name="description" content="Aviso legal, privacidad, cookies, condiciones de uso y declaración responsable de Recunchos.">
+<title data-i18n="legal.title">Legal</title>
+<meta name="description" content="Aviso legal, privacidad, cookies, condiciones de uso y declaración responsable de Recunchos. Versión v2.1.5 en castellano.">
 <link rel="canonical" href="https://recunchos.github.io/legal.html">
 <meta name="theme-color" content="#F3F8FA">
 <meta name="color-scheme" content="light">
@@ -14,25 +14,27 @@
 <link rel="icon" type="image/png" href="/img/favicon-512.png" sizes="512x512">
 <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/idioma.css">
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
+<a class="skip" href="#contenido" data-i18n="skip">Saltar ao contido</a>
 
 <header class="topbar">
   <div class="wrap topbar__in">
-    <a class="brand" href="/" aria-label="Recunchos, inicio">
+    <a class="brand" href="/" data-i18n-attr="aria-label:brand.home" aria-label="Recunchos, inicio">
       <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
       <span class="brand__name">Recunchos</span>
     </a>
     <div class="topbar__end">
-      <nav aria-label="Secciones">
+      <nav data-i18n-attr="aria-label:nav.sections" aria-label="Funcións">
         <ul>
-          <li><a href="/#que-es">Qué es</a></li>
-          <li><a href="/#funciones">Funciones</a></li>
-          <li><a href="/#propietarios">Propietarios</a></li>
-          <li><a href="/#preguntas">Preguntas</a></li>
+          <li><a href="/#que-es" data-i18n="nav.que">Que é</a></li>
+          <li><a href="/#funciones" data-i18n="nav.funciones">Funcións</a></li>
+          <li><a href="/#propietarios" data-i18n="nav.propietarios">Propietarios</a></li>
+          <li><a href="/#preguntas" data-i18n="nav.preguntas">Preguntas</a></li>
         </ul>
       </nav>
+      <div data-lang-slot></div>
     </div>
   </div>
 </header>
@@ -40,14 +42,16 @@
 <main id="contenido">
   <section class="section">
     <div class="wrap narrow">
-      <h2>Legal</h2>
+      <h2 data-i18n="legal.title">Legal</h2>
+      <p class="legal-notice" data-i18n="legal.notice" role="note">Texto legal aprobado en castelán, versión v2.1.5, do 1 de novembro de 2026. É o mesmo contido en todos os idiomas da interface. Non hai tradución revisada: o que les aquí é o texto mestre en castelán.</p>
       <ul class="legal-list">
-        <li><a href="/aviso-legal.html">Aviso legal</a></li>
-        <li><a href="/privacidad.html">Política de privacidad</a></li>
-        <li><a href="/cookies.html">Política de cookies</a></li>
-        <li><a href="/terminos.html">Condiciones de uso</a></li>
-        <li><a href="/declaracion-responsable.html">Declaración responsable</a></li>
-        <li><a href="/eliminar-cuenta.html">Eliminar cuenta</a></li>
+        <li><a href="/aviso-legal.html" data-i18n="legal.link.aviso">Aviso legal</a></li>
+        <li><a href="/privacidad.html" data-i18n="legal.link.privacidad">Política de privacidade</a></li>
+        <li><a href="/cookies.html" data-i18n="legal.link.cookies">Política de cookies</a></li>
+        <li><a href="/terminos.html" data-i18n="legal.link.terminos">Condicións de uso</a></li>
+        <li><a href="/declaracion-responsable.html" data-i18n="legal.link.declaracion">Declaración responsable</a></li>
+        <li><a href="/consentimiento-registro.html" data-i18n="legal.link.alta">Consentimento no rexistro</a></li>
+        <li><a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></li>
       </ul>
     </div>
   </section>
@@ -57,9 +61,11 @@
   <div class="wrap footer__in">
     <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
     <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
-    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
-    <p class="footer__legal"><a href="/legal.html">Legal</a> · <a href="/eliminar-cuenta.html">Eliminar cuenta</a></p>
+    <p class="footer__note" data-i18n="footer.note">Se vas de furanchos, que conduza alguén que non beba.</p>
+    <p class="footer__legal"><a href="/legal.html" data-i18n="nav.legal">Legal</a> · <a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
   </div>
 </footer>
+<script src="/i18n.js"></script>
+<script src="/idioma.js"></script>
 </body>
 </html>

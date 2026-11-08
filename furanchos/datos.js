@@ -103,7 +103,11 @@
   function hoursHtml(row) {
     var bits = hourLines(row.hours).map(esc);
     var note = row.hours_note ? "<p class=\"soft\">" + esc(row.hours_note) + "</p>" : "";
-    if (!bits.length) return "<p class=\"soft\">" + esc(row.hours_note || "Horario no publicado.") + "</p>";
+    var missing = "Horario no publicado.";
+    if (global.RecunchosIdioma && global.RecunchosIdioma.t) {
+      missing = global.RecunchosIdioma.t("ficha.hoursMissing") || missing;
+    }
+    if (!bits.length) return "<p class=\"soft\">" + esc(row.hours_note || missing) + "</p>";
     return "<ul class=\"week\">" + bits.map(function (bit) { return "<li>" + bit + "</li>"; }).join("") + "</ul>" + note;
   }
 

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
+<script src="/frame-guard.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="recover.title">Recuperar contrasinal — Recunchos</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F3F8FA">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/idioma.css">
+</head>
+<body>
+<a class="skip" href="#recuperar" data-i18n="skip">Saltar ao contido</a>
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="/" data-i18n-attr="aria-label:brand.home" aria-label="Recunchos, inicio">
+      <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
+      <span class="brand__name">Recunchos</span>
+    </a>
+    <div class="topbar__end">
+      <nav data-i18n-attr="aria-label:nav.sections" aria-label="Funcións">
+        <ul>
+          <li><a href="/entrar/" data-i18n="account.login">Iniciar sesión</a></li>
+          <li><a href="/crear-cuenta/" data-i18n="account.create">Crear conta</a></li>
+        </ul>
+      </nav>
+      <div data-lang-slot></div>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="recuperar">
+  <form class="auth" id="form" novalidate>
+    <h1 data-i18n="recover.h">Recuperar contrasinal</h1>
+    <p data-i18n="recover.lead">Escribe o correo da conta. Se existe, enviamos unha ligazón que volve a esta web.</p>
+    <label for="email" data-i18n="login.email">Correo</label>
+    <input id="email" name="email" type="email" autocomplete="username" aria-describedby="error ok" aria-invalid="false" required>
+    <p class="err" id="error" role="alert" hidden></p>
+    <p class="ok" id="ok" role="status" hidden></p>
+    <button type="submit" data-i18n="recover.submit">Enviar ligazón</button>
+    <div class="links">
+      <a href="/entrar/" data-i18n="confirm.entrar">Iniciar sesión</a>
+      <a href="/crear-cuenta/" data-i18n="account.create">Crear conta</a>
+    </div>
+  </form>
+</main>
+<footer class="footer">
+  <div class="wrap footer__in">
+    <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
+    <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
+    <p class="footer__note" data-i18n="footer.note">Se vas de furanchos, que conduza alguén que non beba.</p>
+    <p class="footer__legal"><a href="/legal.html" data-i18n="nav.legal">Legal</a> · <a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
+  </div>
+</footer>
+<script src="/i18n.js"></script>
+<script src="/idioma.js"></script>
+<script src="/sesion.js"></script>
+<script src="/recuperar/recuperar.js"></script>
+</body>
+</html>
