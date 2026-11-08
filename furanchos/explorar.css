@@ -43,11 +43,11 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:0;mar
 }
 .skip:focus{left:8px;z-index:5}
 .appbar{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
   padding:12px 16px 8px;background:var(--bg);
 }
 .appbar a.back{
-  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
+  width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
   text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);font-size:1.1rem;
 }
 .appbar h1{font-size:1.45rem;flex:1;min-width:0}

@@ -1,39 +1,41 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="gl">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
 <script src="/frame-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Historias y perfiles — Recunchos</title>
+<title data-i18n="stories.title">Historias e perfís — Recunchos</title>
 <meta name="theme-color" content="#F3F8FA">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/idioma.css">
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
+<a class="skip" href="#contenido" data-i18n="skip">Saltar ao contido</a>
 <header class="topbar">
   <div class="wrap topbar__in">
-    <a class="brand" href="/" aria-label="Recunchos, inicio">
+    <a class="brand" href="/" data-i18n-attr="aria-label:brand.home" aria-label="Recunchos, inicio">
       <img class="brand__mark" src="/img/favicon-512.png" width="32" height="32" alt="">
       <span class="brand__name">Recunchos</span>
     </a>
     <div class="topbar__end">
-      <nav aria-label="Secciones">
+      <nav data-i18n-attr="aria-label:nav.funciones" aria-label="Funcións">
         <ul>
-          <li><a href="/#funciones">Funciones</a></li>
-          <li><a href="/furanchos/">Furanchos</a></li>
+          <li><a href="/#funciones" data-i18n="nav.funciones">Funcións</a></li>
+          <li><a href="/furanchos/" data-i18n="nav.furanchos">Furanchos</a></li>
         </ul>
       </nav>
+      <div data-lang-slot></div>
     </div>
   </div>
 </header>
 <main id="contenido">
   <section class="section">
     <div class="wrap narrow">
-      <h2>Feed, historias y perfiles</h2>
-      <p class="lead">Las historias van en dos filas: Gente y Furanchos. Desde el perfil se publica, se comenta y se sigue a otras personas. La fila de Furanchos muestra las historias de las casas.</p>
-      <p class="lead">Las historias y los perfiles son de quien tiene cuenta. En esta web no se muestran, para no publicar datos de personas. Las casas sí están en el <a href="/furanchos/">listado de furanchos</a>.</p>
+      <h2 data-i18n="stories.h">Feed, historias e perfís</h2>
+      <p class="lead" data-i18n="stories.p1">As historias van en dúas filas: Xente e Furanchos. Desde o perfil publícase, coméntase e séguese a outras persoas. A fila de Furanchos mostra as historias das casas.</p>
+      <p class="lead"><span data-i18n="stories.p2">As historias e os perfís son de quen ten conta. Nesta web non se mostran, para non publicar datos de persoas. As casas si están no listado de furanchos.</span> <a href="/furanchos/" data-i18n="stories.link">listado de furanchos</a>.</p>
     </div>
   </section>
 </main>
@@ -41,9 +43,11 @@
   <div class="wrap footer__in">
     <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
     <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
-    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
-    <p class="footer__legal"><a href="/legal.html">Legal</a> · <a href="/eliminar-cuenta.html">Eliminar cuenta</a></p>
+    <p class="footer__note" data-i18n="footer.note">Se vas de furanchos, que conduza alguén que non beba.</p>
+    <p class="footer__legal"><a href="/legal.html" data-i18n="nav.legal">Legal</a> · <a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
   </div>
 </footer>
+<script src="/i18n.js"></script>
+<script src="/idioma.js"></script>
 </body>
 </html>

@@ -8,6 +8,27 @@
   var explore = document.getElementById("explore");
   var rows = [];
   var scope = "galicia";
+  var ready = false;
+
+  function tr(key) {
+    var I = window.RecunchosIdioma;
+    var value = I && I.t ? I.t(key) : "";
+    return value || "";
+  }
+
+  function statusCode(row) {
+    var label = D.statusLabel(row);
+    if (label === "Abierto") return "abierto";
+    if (label === "Abrimos") return "abrimos";
+    if (label === "Cerrado") return "cerrado";
+    return "";
+  }
+
+  function scopeFromHash() {
+    var hash = (location.hash || "").replace(/^#/, "");
+    if (hash === "espana" || hash === "por-espana") return "espana";
+    return "galicia";
+  }
   var map = L.map("mapa", { scrollWheelZoom: true });
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
@@ -18,8 +39,8 @@
   map.setView([42.5, -8.4], 8);
 
   function pin(row) {
-    var label = D.statusLabel(row);
-    var kind = label === "Abierto" || label === "Abrimos" ? "open" : "shut";
+    var code = statusCode(row);
+    var kind = code === "abierto" || code === "abrimos" ? "open" : "shut";
     return L.divIcon({
       className: "pin",
       html: '<div style="width:18px;height:18px;border-radius:99px;border:2px solid #fff;box-shadow:0 2px 6px rgba(40,20,20,.35);background:' + (kind === "open" ? "#1F5F8B" : "#5A7084") + '"></div>',
@@ -49,19 +70,21 @@
 
   function draw() {
     var items = shown();
-    var noun = scope === "galicia" ? (items.length === 1 ? " furancho" : " furanchos") : (items.length === 1 ? " casa" : " casas");
-    estado.textContent = items.length + noun;
+    var noun = scope === "galicia"
+      ? tr(items.length === 1 ? "explore.oneFurancho" : "explore.manyFuranchos")
+      : tr(items.length === 1 ? "explore.oneCasa" : "explore.manyCasas");
+    estado.textContent = items.length + " " + noun;
     lista.innerHTML = items.map(function (row) {
       var photo = D.photoUrl(row.cover_photo_id);
       var pic = photo
         ? '<img class="avatar" alt="" src="' + D.esc(photo) + '">'
         : '<span class="ph" aria-hidden="true">' + D.esc((row.name || "?").slice(0, 1)) + "</span>";
       var place = [row.municipality, row.province].filter(Boolean).join(" · ");
-      var label = D.statusLabel(row);
+      var code = statusCode(row);
       var pill = "";
-      if (label === "Abierto") pill = '<span class="pill open">Abierto</span>';
-      else if (label === "Abrimos") pill = '<span class="pill soon">Abrimos</span>';
-      else if (label === "Cerrado") pill = '<span class="pill">Cerrado</span>';
+      if (code === "abierto") pill = '<span class="pill open">' + D.esc(tr("status.abierto")) + "</span>";
+      else if (code === "abrimos") pill = '<span class="pill soon">' + D.esc(tr("status.abrimos")) + "</span>";
+      else if (code === "cerrado") pill = '<span class="pill">' + D.esc(tr("status.cerrado")) + "</span>";
       return '<li><a class="row" href="ficha.html?id=' + encodeURIComponent(row.id) + '">' + pic +
         "<div><h2>" + D.esc(row.name) + "</h2><p>" + D.esc(place) + "</p></div>" + pill + "</a></li>";
     }).join("");
@@ -96,7 +119,7 @@
     var current = concello.value;
     var zones = {};
     rows.filter(D.isGaliciaPlace).forEach(function (row) { if (row.municipality) zones[row.municipality] = true; });
-    concello.innerHTML = '<option value="">Todos los concellos</option>';
+    concello.innerHTML = '<option value="">' + D.esc(tr("explore.allTowns")) + "</option>";
     Object.keys(zones).sort(function (a, b) { return a.localeCompare(b, "es"); }).forEach(function (name) {
       var opt = document.createElement("option");
       opt.value = name;
@@ -110,11 +133,14 @@
     var root = document.getElementById("comunidades");
     root.innerHTML = D.SPAIN_COMMUNITIES.map(function (item) {
       var count = D.placesInCommunity(rows, item.name).length;
+      var intro = tr("community." + item.id) || item.intro;
+      var noun = tr(count === 1 ? "explore.oneCasa" : "explore.manyCasas");
       return '<button type="button" class="community" data-id="' + D.esc(item.id) + '">' +
         '<img alt="" src="' + D.esc(item.photo) + '">' +
         '<span class="copy"><h2>' + D.esc(item.name) + '</h2>' +
         '<p class="local">' + D.esc(item.localName) + '</p>' +
-        '<p class="casas">' + count + (count === 1 ? " casa" : " casas") + "</p></span></button>";
+        '<p class="casas">' + count + " " + D.esc(noun) + "</p>" +
+        '<p class="intro">' + D.esc(intro) + "</p></span></button>";
     }).join("");
   }
 
@@ -122,34 +148,54 @@
     scope = next;
     var community = D.SPAIN_COMMUNITIES.filter(function (item) { return item.id === next; })[0];
     explore.className = "explore " + (next === "galicia" ? "region-galicia" : community ? "region-community" : "region-espana");
-    document.getElementById("tab-galicia").setAttribute("aria-pressed", next === "galicia" ? "true" : "false");
-    document.getElementById("tab-espana").setAttribute("aria-pressed", next === "galicia" ? "false" : "true");
+    var galiciaTab = document.getElementById("tab-galicia");
+    var spainTab = document.getElementById("tab-espana");
+    var onGalicia = next === "galicia";
+    galiciaTab.setAttribute("aria-pressed", onGalicia ? "true" : "false");
+    galiciaTab.setAttribute("aria-selected", onGalicia ? "true" : "false");
+    spainTab.setAttribute("aria-pressed", onGalicia ? "false" : "true");
+    spainTab.setAttribute("aria-selected", onGalicia ? "false" : "true");
     if (community) {
       document.getElementById("community-name").textContent = community.name;
       document.getElementById("community-local").textContent = community.localName;
-      document.getElementById("community-intro").textContent = community.intro;
+      document.getElementById("community-intro").textContent = tr("community." + community.id) || community.intro;
     }
     if (next !== "espana") draw();
   }
 
   document.getElementById("modo-lista").addEventListener("click", function () { mode("lista"); });
   document.getElementById("modo-mapa").addEventListener("click", function () { mode("mapa"); });
-  document.getElementById("tab-galicia").addEventListener("click", function () { setScope("galicia"); });
-  document.getElementById("tab-espana").addEventListener("click", function () { setScope("espana"); });
-  document.getElementById("volver").addEventListener("click", function () { setScope("espana"); });
+  function goScope(next) {
+    var hash = next === "espana" ? "#espana" : "#galicia";
+    if (location.hash !== hash && (next === "galicia" || next === "espana")) {
+      history.replaceState(null, "", hash);
+    }
+    setScope(next);
+  }
+  document.getElementById("tab-galicia").addEventListener("click", function () { goScope("galicia"); });
+  document.getElementById("tab-espana").addEventListener("click", function () { goScope("espana"); });
+  document.getElementById("volver").addEventListener("click", function () { goScope("espana"); });
   document.getElementById("comunidades").addEventListener("click", function (event) {
     var card = event.target.closest(".community");
     if (card) setScope(card.getAttribute("data-id"));
   });
 
-  D.loadAll().then(function (data) {
-    rows = data || [];
+  function refreshCopy() {
     fillConcellos();
     paintCommunities();
-    draw();
+    if (scope !== "espana") draw();
+  }
+
+  D.loadAll().then(function (data) {
+    rows = data || [];
+    ready = true;
+    setScope(scopeFromHash());
+    refreshCopy();
   }).catch(function () {
-    estado.textContent = "No se ha podido cargar el listado.";
+    estado.textContent = tr("explore.fail");
   });
+  window.addEventListener("hashchange", function () { setScope(scopeFromHash()); });
+  document.addEventListener("recunchos:idioma", refreshCopy);
   q.addEventListener("input", draw);
   concello.addEventListener("change", draw);
 })();

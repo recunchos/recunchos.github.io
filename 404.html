@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="gl">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
 <script src="/frame-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Página no encontrada — Recunchos</title>
+<title data-i18n="notfound.title">Páxina non atopada — Recunchos</title>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#F3F8FA">
 <meta name="color-scheme" content="light">
@@ -13,21 +13,25 @@
 <link rel="icon" type="image/png" href="/img/favicon-512.png" sizes="512x512">
 <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/idioma.css">
 <script src="/spa-redirect.js"></script>
 </head>
 <body>
 <main class="notfound">
   <img class="notfound__logo" src="/img/favicon-512.png" width="120" height="120" alt="Icono de Recunchos">
-  <h1>Página no encontrada</h1>
-  <p><a href="/">Volver a Recunchos</a></p>
+  <h1 data-i18n="notfound.h">Páxina non atopada</h1>
+  <p><a href="/" data-i18n="notfound.back">Volver a Recunchos</a></p>
+  <div data-lang-slot></div>
 </main>
 <footer class="footer">
   <div class="wrap footer__in">
     <p class="footer__brand"><img src="/img/favicon-512.png" width="32" height="32" alt="">Recunchos</p>
     <p class="footer__mail"><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a></p>
-    <p class="footer__note">Si vas de furanchos, que conduzca alguien que no beba.</p>
-    <p class="footer__legal"><a href="/legal.html">Legal</a> · <a href="/eliminar-cuenta.html">Eliminar cuenta</a></p>
+    <p class="footer__note" data-i18n="footer.note">Se vas de furanchos, que conduza alguén que non beba.</p>
+    <p class="footer__legal"><a href="/legal.html" data-i18n="nav.legal">Legal</a> · <a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
   </div>
 </footer>
+<script src="/i18n.js"></script>
+<script src="/idioma.js"></script>
 </body>
 </html>

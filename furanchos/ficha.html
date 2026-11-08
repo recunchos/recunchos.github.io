@@ -1,31 +1,37 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="gl">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://fwfwfbtzarmwalfaxelh.supabase.co">
 <script src="/frame-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ficha — Recunchos</title>
+<title data-i18n="ficha.h">Ficha</title>
+<link rel="stylesheet" href="/idioma.css">
 <meta name="theme-color" content="#F3F8FA">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="stylesheet" href="vendor/leaflet.css">
 <link rel="stylesheet" href="explorar.css">
 </head>
 <body>
-<a class="skip" href="#ficha">Saltar al contenido</a>
+<a class="skip" href="#ficha" data-i18n="skip">Saltar ao contido</a>
 <header class="appbar">
-  <a class="back" href="index.html" aria-label="Volver a Explorar">←</a>
-  <h1>Ficha</h1>
+  <a class="back" href="index.html" data-i18n-attr="aria-label:ficha.back" aria-label="Volver a Explorar">←</a>
+  <h1 data-i18n="ficha.h">Ficha</h1>
+  <a class="denunciar" id="denunciar" href="mailto:holarecunchos@hotmail.com?subject=Denunciar" data-i18n="report.label">Denunciar</a>
+  <div data-lang-slot></div>
   <div class="appbar__account" data-sesion>
-    <a class="account__ghost" href="/crear-cuenta/">Crear cuenta</a>
-    <a class="login-link" href="/entrar/">Iniciar sesión</a>
+    <a class="account__ghost" href="/crear-cuenta/" data-i18n="account.create">Crear conta</a>
+    <a class="login-link" href="/entrar/" data-i18n="account.login">Iniciar sesión</a>
   </div>
 </header>
-<main class="sheet" id="ficha"><p class="err">Cargando ficha…</p></main>
+<p class="report-note" data-i18n="report.note" role="note">A denuncia envíase por correo e pódese facer sen conta. O texto que a regula é o castelán aprobado (v2.1.5); non hai tradución revisada.</p>
+<main class="sheet" id="ficha"><p class="err" data-i18n="ficha.loading">Cargando ficha…</p></main>
 <footer class="foot">
-  <p>Si vas de furanchos, que conduzca alguien que no beba.</p>
-  <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html">Legal</a> · <a href="/eliminar-cuenta.html">Eliminar cuenta</a></p>
+  <p data-i18n="footer.note">Se vas de furanchos, que conduza alguén que non beba.</p>
+  <p><a href="mailto:holarecunchos@hotmail.com">holarecunchos@hotmail.com</a> · <a href="/legal.html" data-i18n="nav.legal">Legal</a> · <a href="/eliminar-cuenta.html" data-i18n="footer.delete">Eliminar conta</a></p>
 </footer>
+<script src="/i18n.js"></script>
+<script src="/idioma.js"></script>
 <script src="/sesion.js"></script>
 <script src="vendor/leaflet.js"></script>
 <script src="datos.js"></script>

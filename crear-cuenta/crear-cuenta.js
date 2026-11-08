@@ -18,6 +18,9 @@
     ok.hidden = true;
     button.disabled = true;
     var kind = form.kind.value;
+    if (window.RecunchosIdioma && window.RecunchosIdioma.recordAcceptance) {
+      window.RecunchosIdioma.recordAcceptance();
+    }
     S.signUp({
       name: form.name.value,
       email: form.email.value,

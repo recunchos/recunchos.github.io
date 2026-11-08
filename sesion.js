@@ -123,11 +123,21 @@
     return "/crear-cuenta/?next=" + encodeURIComponent(here());
   }
 
-  function passwordProblem(password) {
-    if (!password || password.length < 8) return "La contraseña necesita al menos 8 caracteres.";
-    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(password) || !/\d/.test(password)) {
-      return "La contraseña necesita una letra y un número.";
+  function tr(key) {
+    var I = global.RecunchosIdioma;
+    var value = I && I.t ? I.t(key) : "";
+    return value || "";
+  }
+
+  function hasLetter(password) {
+    try { return /\p{L}/u.test(password); } catch (err) {
+      return /[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÒÇàèòç]/.test(password);
     }
+  }
+
+  function passwordProblem(password) {
+    if (!password || password.length < 8) return tr("err.passwordMin");
+    if (!hasLetter(password) || !/\d/.test(password)) return tr("err.passwordMix");
     return "";
   }
 
@@ -142,8 +152,8 @@
 
   function publicError(message) {
     var text = String(message || "");
-    if (/\d{8}[A-Za-z]/.test(text) || /\+?\d[\d\s]{8,}/.test(text)) return "No se ha podido completar.";
-    return text || "No se ha podido completar.";
+    if (/\d{8}[A-Za-z]/.test(text) || /\+?\d[\d\s]{8,}/.test(text)) return tr("err.public");
+    return text || tr("err.public");
   }
 
   function signIn(email, password) {
@@ -155,14 +165,14 @@
       return res.json().then(function (body) {
         if (!res.ok || !body || !body.access_token) {
           var code = body && (body.error_description || body.msg || body.error || "");
-          if (/invalid/i.test(code)) return { ok: false, message: "El correo o la contraseña no coinciden." };
-          return { ok: false, message: "No se ha podido entrar. Revisa el correo y la contraseña." };
+          if (/invalid/i.test(code)) return { ok: false, message: tr("err.authInvalid") };
+          return { ok: false, message: tr("err.authFail") };
         }
         save(body);
         return { ok: true };
       });
     }).catch(function () {
-      return { ok: false, message: "No hay conexión. Vuelve a intentarlo." };
+      return { ok: false, message: tr("err.offline") };
     });
   }
 
@@ -171,16 +181,18 @@
     var email = String(fields.email || "").trim().toLowerCase();
     var municipality = String(fields.municipality || "").trim();
     var accountKind = fields.accountKind === "propietario" ? "propietario" : "comensal";
-    if (!name) return Promise.resolve({ ok: false, message: "Escribe tu nombre." });
+    if (!name) return Promise.resolve({ ok: false, message: tr("err.name") });
     if (!email.includes("@") || !email.includes(".") || email.charAt(0) === "@" || email.slice(-1) === "@") {
-      return Promise.resolve({ ok: false, message: "El correo no parece válido." });
+      return Promise.resolve({ ok: false, message: tr("err.email") });
     }
     var passwordError = passwordProblem(fields.password);
     if (passwordError) return Promise.resolve({ ok: false, message: passwordError });
-    if (!municipality) return Promise.resolve({ ok: false, message: "Escribe el municipio." });
-    if (!fields.ageConfirmed) return Promise.resolve({ ok: false, message: "Confirma que tienes 18 años o más para crear la cuenta." });
-    if (!fields.termsAccepted) return Promise.resolve({ ok: false, message: "Acepta las Condiciones de uso para crear la cuenta." });
-    if (!fields.privacyAcknowledged) return Promise.resolve({ ok: false, message: "Confirma que has leído la Política de privacidad para crear la cuenta." });
+    if (!municipality) return Promise.resolve({ ok: false, message: tr("err.town") });
+    if (!fields.ageConfirmed) return Promise.resolve({ ok: false, message: tr("err.age") });
+    if (!fields.termsAccepted) return Promise.resolve({ ok: false, message: tr("err.terms") });
+    if (!fields.privacyAcknowledged) return Promise.resolve({ ok: false, message: tr("err.privacy") });
+    var idioma = global.RecunchosIdioma;
+    var uiLang = idioma && idioma.lang ? idioma.lang() : "gl";
     var stamp = new Date().toISOString();
     return fetch(SUPABASE + "/auth/v1/signup?redirect_to=" + encodeURIComponent("https://recunchos.github.io/app/"), {
       method: "POST",
@@ -196,7 +208,10 @@
           age_confirmed_18_at: stamp,
           terms_accepted_at: stamp,
           privacy_acknowledged_at: stamp,
-          legal_text_version: "v2.1"
+          legal_text_version: "v2.1.5",
+          legal_text_language: "es",
+          ui_language: uiLang,
+          legal_shown: "es:v2.1.5"
         },
         email_redirect_to: "https://recunchos.github.io/app/"
       })
@@ -204,21 +219,21 @@
       return res.json().then(function (body) {
         if (!res.ok) {
           var raw = body && (body.msg || body.error_description || body.message) || "";
-          if (/invalid/i.test(raw) && /email/i.test(raw)) return { ok: false, message: "El correo no parece válido." };
-          if (/already registered|already exists/i.test(raw)) return { ok: false, message: "Ese correo ya tiene cuenta. Entra con la contraseña." };
-          if (/rate limit|over_email_send/i.test(raw)) return { ok: false, message: "Hay demasiados envíos seguidos. Espera un rato y vuelve a intentarlo." };
-          return { ok: false, message: publicError(raw) === "No se ha podido completar." ? "No se pudo crear la cuenta. Inténtalo de nuevo." : publicError(raw) };
+          if (/invalid/i.test(raw) && /email/i.test(raw)) return { ok: false, message: tr("err.email") };
+          if (/already registered|already exists/i.test(raw)) return { ok: false, message: tr("err.exists") };
+          if (/rate limit|over_email_send/i.test(raw)) return { ok: false, message: tr("err.rate") };
+          return { ok: false, message: publicError(raw) === tr("err.public") ? tr("err.signupFail") : publicError(raw) };
         }
         var user = body.user || (body.data && body.data.user);
         var session = body.session || (body.access_token ? body : null);
         if (body.access_token) session = body;
         var identities = user && user.identities;
         if (user && Array.isArray(identities) && identities.length === 0) {
-          return { ok: false, message: "Ese correo ya tiene cuenta. Entra con la contraseña. Si aún no la confirmaste, abre el correo de Recunchos." };
+          return { ok: false, message: tr("err.existsConfirm") };
         }
-        if (!user) return { ok: false, message: "No se pudo crear la cuenta. Inténtalo de nuevo." };
+        if (!user) return { ok: false, message: tr("err.signupFail") };
         if (!session || !session.access_token) {
-          return { ok: true, confirmEmail: true, message: "Alta creada. Revisa el correo y pulsa el enlace para confirmarla. Hasta entonces no se puede entrar. El mensaje sale de Recunchos y el enlace abre la app." };
+          return { ok: true, confirmEmail: true, message: tr("err.confirmEmail") };
         }
         save(session);
         return updateProfile(session, { name: name, municipality: municipality, accountKind: accountKind }).then(function (warning) {
@@ -226,7 +241,7 @@
         });
       });
     }).catch(function () {
-      return { ok: false, message: "No hay conexión. Vuelve a intentarlo." };
+      return { ok: false, message: tr("err.offline") };
     });
   }
 
@@ -239,7 +254,7 @@
       headers: headers,
       body: JSON.stringify({ name: profile.name, municipality: profile.municipality })
     }).then(function (res) {
-      if (!res.ok) return "La cuenta está creada, pero no se pudo guardar el municipio en el perfil.";
+      if (!res.ok) return tr("err.townSave");
       if (profile.accountKind !== "propietario") return "";
       return fetch(url, {
         method: "PATCH",
@@ -250,13 +265,13 @@
         return kind.json().then(function (body) {
           var message = body && body.message || "";
           if (/account_kind|schema cache|PGRST204|column/i.test(message)) return "";
-          return "La cuenta está creada, pero no se pudo marcar el alta de propietario en el perfil.";
+          return tr("err.ownerSave");
         }).catch(function () {
-          return "La cuenta está creada, pero no se pudo marcar el alta de propietario en el perfil.";
+          return tr("err.ownerSave");
         });
       });
     }).catch(function () {
-      return "La cuenta está creada, pero no se pudo guardar el municipio en el perfil.";
+      return tr("err.townSave");
     });
   }
 
@@ -286,7 +301,7 @@
 
   function setFollow(furanchoId, follow) {
     var session = read();
-    if (!session) return Promise.resolve({ ok: false, message: "Entra para seguir la casa." });
+    if (!session) return Promise.resolve({ ok: false, message: tr("err.followNeed") });
     var headers = authHeaders(session, true);
     if (follow) {
       headers.Prefer = "return=minimal";
@@ -300,22 +315,22 @@
           var message = body && body.message || "";
           if (/duplicate|23505/i.test(message)) return { ok: true };
           return { ok: false, message: publicError(message) };
-        }).catch(function () { return { ok: false, message: "No se ha podido seguir la casa." }; });
+        }).catch(function () { return { ok: false, message: tr("err.followFail") }; });
       });
     }
     var url = SUPABASE + "/rest/v1/house_follows?user_id=eq." + encodeURIComponent(session.user.id) +
       "&furancho_id=eq." + encodeURIComponent(furanchoId);
     return fetch(url, { method: "DELETE", headers: authHeaders(session, false) }).then(function (res) {
       if (res.ok) return { ok: true };
-      return { ok: false, message: "No se ha podido dejar de seguir." };
+      return { ok: false, message: tr("err.unfollow") };
     });
   }
 
   function seal(furanchoId) {
     var session = read();
-    if (!session) return Promise.resolve({ ok: false, message: "Entra para sellar el pasaporte." });
+    if (!session) return Promise.resolve({ ok: false, message: tr("err.sealNeed") });
     if (!navigator.geolocation) {
-      return Promise.resolve({ ok: false, message: "Este navegador no da la ubicación. Sin ella no se sella." });
+      return Promise.resolve({ ok: false, message: tr("err.noGeo") });
     }
     return new Promise(function (resolve) {
       navigator.geolocation.getCurrentPosition(function (pos) {
@@ -329,32 +344,32 @@
             p_accuracy: pos.coords.accuracy
           })
         }).then(function (res) {
-          if (res.ok) return resolve({ ok: true, message: "Sello de hoy en el pasaporte." });
+          if (res.ok) return resolve({ ok: true, message: tr("err.sealOk") });
           return res.json().then(function (body) {
             resolve({ ok: false, message: publicError(body && (body.message || body.hint)) });
           }).catch(function () {
-            resolve({ ok: false, message: "No se ha podido sellar." });
+            resolve({ ok: false, message: tr("err.sealFail") });
           });
         }).catch(function () {
-          resolve({ ok: false, message: "No hay conexión. Vuelve a intentarlo." });
+          resolve({ ok: false, message: tr("err.offline") });
         });
       }, function () {
-        resolve({ ok: false, message: "El sello pide permiso de ubicación, cerca de la casa." });
+        resolve({ ok: false, message: tr("err.sealNear") });
       }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
     });
   }
 
   function userHtml(session) {
-    var person = displayName(session.user) || "Tu cuenta";
+    var person = displayName(session.user) || tr("account.you");
     var letter = person.charAt(0).toLocaleUpperCase("es");
     return '<div class="account__menu">' +
-      '<button type="button" class="account__user" aria-expanded="false" aria-haspopup="true">' +
+      '<button type="button" class="account__user" aria-expanded="false" aria-haspopup="menu" aria-label="' + esc(tr("account.menu")) + '">' +
       '<span class="account__avatar" aria-hidden="true">' + esc(letter) + "</span>" +
       "<span>" + esc(person) + "</span></button>" +
-      '<div class="account__panel" hidden>' +
-      '<a href="/perfil/">Mi perfil</a>' +
-      '<a href="/app/">Abrir app</a>' +
-      '<button type="button" data-logout>Cerrar sesión</button>' +
+      '<div class="account__panel" role="menu" hidden>' +
+      '<a role="menuitem" href="/perfil/">' + esc(tr("account.profile")) + "</a>" +
+      '<a role="menuitem" href="/app/">' + esc(tr("account.openApp")) + "</a>" +
+      '<button type="button" role="menuitem" data-logout>' + esc(tr("account.logout")) + "</button>" +
       "</div></div>";
   }
 
@@ -386,8 +401,9 @@
     }
   }
 
-  function paint() {
-    verify().then(function (session) {
+  var cachedSession = undefined;
+
+  function render(session) {
       var boxes = document.querySelectorAll("[data-sesion]");
       for (var i = 0; i < boxes.length; i++) {
         if (session) boxes[i].innerHTML = userHtml(session);
@@ -399,6 +415,12 @@
         }
       }
       if (session) bindMenus();
+  }
+
+  function paint() {
+    verify().then(function (session) {
+      cachedSession = session;
+      render(session);
     });
   }
 
@@ -419,6 +441,7 @@
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
+    repaint: function () { if (cachedSession !== undefined) render(cachedSession); },
     registerHref: registerHref,
     isFollowing: isFollowing,
     setFollow: setFollow,
