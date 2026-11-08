@@ -6,7 +6,9 @@
     "lat", "lng", "coords_approximate", "description", "wine_types", "food",
     "menu", "hours", "hours_note", "season_label", "today_status",
     "today_status_on", "closed", "closed_note", "cover_photo_id", "local_type_label",
-    "phone", "autonomous_community", "local_type"
+    "phone", "autonomous_community", "local_type",
+    "price_level", "rating", "review_count", "season_start", "season_end",
+    "opens_on", "listed_year"
   ].join(",");
 
   function esc(value) {
