@@ -20,7 +20,7 @@
       <span class="brand__name">Recunchos</span>
     </a>
     <div class="topbar__end">
-      <nav data-i18n-attr="aria-label:nav.funciones" aria-label="Funcións">
+      <nav data-i18n-attr="aria-label:nav.sections" aria-label="Funcións">
         <ul>
           <li><a href="/#funciones" data-i18n="nav.funciones">Funcións</a></li>
           <li><a href="/furanchos/" data-i18n="nav.furanchos">Furanchos</a></li>
@@ -34,7 +34,7 @@
   </div>
 </header>
 <main class="wrap" id="alta">
-  <form class="auth" id="form" aria-describedby="aviso-legal-idioma">
+  <form class="auth" id="form" novalidate aria-describedby="aviso-legal-idioma">
     <h1 data-i18n="signup.h">Crear conta</h1>
     <p data-i18n="signup.lead">A alta é na web, cos mesmos datos que na app. Segues aquí.</p>
     <fieldset class="kinds">
@@ -43,14 +43,14 @@
       <label><input type="radio" name="kind" value="propietario"> <span data-i18n="signup.kindOwner">Son propietario</span></label>
     </fieldset>
     <label for="name" data-i18n="signup.name">Nome</label>
-    <input id="name" name="name" autocomplete="name" required>
+    <input id="name" name="name" autocomplete="name" aria-describedby="error" aria-invalid="false" required>
     <label for="email" data-i18n="signup.email">Correo</label>
-    <input id="email" name="email" type="email" autocomplete="username" required>
+    <input id="email" name="email" type="email" autocomplete="username" aria-describedby="error" aria-invalid="false" required>
     <label for="password" data-i18n="signup.password">Contrasinal</label>
-    <input id="password" name="password" type="password" autocomplete="new-password" required>
-    <p class="hint" data-i18n="signup.hint">Mínimo 8 caracteres, cunha letra e un número.</p>
+    <input id="password" name="password" type="password" autocomplete="new-password" aria-describedby="password-hint error" aria-invalid="false" required>
+    <p class="hint" id="password-hint" data-i18n="signup.hint">Mínimo 8 caracteres, cunha letra e un número.</p>
     <label for="municipality" data-i18n="signup.town">Concello</label>
-    <input id="municipality" name="municipality" autocomplete="address-level2" required>
+    <input id="municipality" name="municipality" autocomplete="address-level2" aria-describedby="error" aria-invalid="false" required>
     <p class="legal-notice" id="aviso-legal-idioma" data-i18n="legal.notice" role="note">Texto legal aprobado en castelán, versión v2.1.5, do 1 de novembro de 2026. É o mesmo contido en todos os idiomas da interface. Non hai tradución revisada: o que les aquí é o texto mestre en castelán.</p>
     <div class="legal-master" data-legal-master lang="es">
       <p class="version">VERSIÓN v2.1.5 (Recunchos) — APROBADA por el titular el 01/11/2026</p>
@@ -70,8 +70,8 @@
         </ul>
       </section>
     </div>
-    <p class="err" id="error" hidden></p>
-    <p class="ok" id="ok" hidden></p>
+    <p class="err" id="error" role="alert" hidden></p>
+    <p class="ok" id="ok" role="status" hidden></p>
     <button type="submit" id="submit" disabled data-i18n="signup.submit">Crear conta</button>
     <div class="links">
       <a id="entrar" href="/entrar/" data-i18n="signup.have">Xa teño conta</a>

@@ -21,7 +21,7 @@
       <span class="brand__name">Recunchos</span>
     </a>
     <div class="topbar__end">
-      <nav data-i18n-attr="aria-label:nav.funciones" aria-label="Funcións">
+      <nav data-i18n-attr="aria-label:nav.sections" aria-label="Funcións">
         <ul>
           <li><a href="/entrar/" data-i18n="account.login">Iniciar sesión</a></li>
           <li><a href="/crear-cuenta/" data-i18n="account.create">Crear conta</a></li>
@@ -32,13 +32,13 @@
   </div>
 </header>
 <main class="wrap" id="recuperar">
-  <form class="auth" id="form">
+  <form class="auth" id="form" novalidate>
     <h1 data-i18n="recover.h">Recuperar contrasinal</h1>
     <p data-i18n="recover.lead">Escribe o correo da conta. Se existe, enviamos unha ligazón que volve a esta web.</p>
     <label for="email" data-i18n="login.email">Correo</label>
-    <input id="email" name="email" type="email" autocomplete="username" required>
-    <p class="err" id="error" hidden></p>
-    <p class="ok" id="ok" hidden></p>
+    <input id="email" name="email" type="email" autocomplete="username" aria-describedby="error ok" aria-invalid="false" required>
+    <p class="err" id="error" role="alert" hidden></p>
+    <p class="ok" id="ok" role="status" hidden></p>
     <button type="submit" data-i18n="recover.submit">Enviar ligazón</button>
     <div class="links">
       <a href="/entrar/" data-i18n="confirm.entrar">Iniciar sesión</a>

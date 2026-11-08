@@ -20,7 +20,7 @@
       <span class="brand__name">Recunchos</span>
     </a>
     <div class="topbar__end">
-      <nav data-i18n-attr="aria-label:nav.funciones" aria-label="Funcións">
+      <nav data-i18n-attr="aria-label:nav.sections" aria-label="Funcións">
         <ul>
           <li><a href="/#funciones" data-i18n="nav.funciones">Funcións</a></li>
           <li><a href="/furanchos/" data-i18n="nav.furanchos">Furanchos</a></li>
@@ -31,14 +31,14 @@
   </div>
 </header>
 <main class="wrap" id="entrar">
-  <form class="auth" id="form">
+  <form class="auth" id="form" novalidate>
     <h1 data-i18n="login.h">Iniciar sesión</h1>
     <p data-i18n="login.lead">Entra co correo da túa conta. Segues na web.</p>
     <label for="email" data-i18n="login.email">Correo</label>
-    <input id="email" name="email" type="email" autocomplete="username" required>
+    <input id="email" name="email" type="email" autocomplete="username" aria-describedby="error" aria-invalid="false" required>
     <label for="password" data-i18n="login.password">Contrasinal</label>
-    <input id="password" name="password" type="password" autocomplete="current-password" required>
-    <p class="err" id="error" hidden></p>
+    <input id="password" name="password" type="password" autocomplete="current-password" aria-describedby="error" aria-invalid="false" required>
+    <p class="err" id="error" role="alert" hidden></p>
     <button type="submit" data-i18n="login.submit">Entrar</button>
     <div class="links">
       <a href="/recuperar/" data-i18n="login.forgot">Esqueciches o contrasinal?</a>

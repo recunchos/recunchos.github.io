@@ -146,9 +146,13 @@
   }
 
   function passwordProblem(password) {
-    if (!password || password.length < 8) return tr("err.passwordMin");
-    if (!hasLetter(password) || !/\d/.test(password)) return tr("err.passwordMix");
+    if (!password || password.length < 8) return "err.passwordMin";
+    if (!hasLetter(password) || !/\d/.test(password)) return "err.passwordMix";
     return "";
+  }
+
+  function fail(code) {
+    return { ok: false, code: code, message: tr(code) };
   }
 
   function authHeaders(session, json) {
@@ -175,14 +179,14 @@
       return res.json().then(function (body) {
         if (!res.ok || !body || !body.access_token) {
           var code = body && (body.error_description || body.msg || body.error || "");
-          if (/invalid/i.test(code)) return { ok: false, message: tr("err.authInvalid") };
-          return { ok: false, message: tr("err.authFail") };
+          if (/invalid/i.test(code)) return fail("err.authInvalid");
+          return fail("err.authFail");
         }
         save(body);
         return { ok: true };
       });
     }).catch(function () {
-      return { ok: false, message: tr("err.offline") };
+      return fail("err.offline");
     });
   }
 
@@ -191,16 +195,16 @@
     var email = String(fields.email || "").trim().toLowerCase();
     var municipality = String(fields.municipality || "").trim();
     var accountKind = fields.accountKind === "propietario" ? "propietario" : "comensal";
-    if (!name) return Promise.resolve({ ok: false, message: tr("err.name") });
+    if (!name) return Promise.resolve(fail("err.name"));
     if (!email.includes("@") || !email.includes(".") || email.charAt(0) === "@" || email.slice(-1) === "@") {
-      return Promise.resolve({ ok: false, message: tr("err.email") });
+      return Promise.resolve(fail("err.email"));
     }
     var passwordError = passwordProblem(fields.password);
-    if (passwordError) return Promise.resolve({ ok: false, message: passwordError });
-    if (!municipality) return Promise.resolve({ ok: false, message: tr("err.town") });
-    if (!fields.ageConfirmed) return Promise.resolve({ ok: false, message: tr("err.age") });
-    if (!fields.termsAccepted) return Promise.resolve({ ok: false, message: tr("err.terms") });
-    if (!fields.privacyAcknowledged) return Promise.resolve({ ok: false, message: tr("err.privacy") });
+    if (passwordError) return Promise.resolve(fail(passwordError));
+    if (!municipality) return Promise.resolve(fail("err.town"));
+    if (!fields.ageConfirmed) return Promise.resolve(fail("err.age"));
+    if (!fields.termsAccepted) return Promise.resolve(fail("err.terms"));
+    if (!fields.privacyAcknowledged) return Promise.resolve(fail("err.privacy"));
     var idioma = global.RecunchosIdioma;
     var uiLang = idioma && idioma.lang ? idioma.lang() : "gl";
     var stamp = new Date().toISOString();
@@ -229,21 +233,23 @@
       return res.json().then(function (body) {
         if (!res.ok) {
           var raw = body && (body.msg || body.error_description || body.message) || "";
-          if (/invalid/i.test(raw) && /email/i.test(raw)) return { ok: false, message: tr("err.email") };
-          if (/already registered|already exists/i.test(raw)) return { ok: false, message: tr("err.exists") };
-          if (/rate limit|over_email_send/i.test(raw)) return { ok: false, message: tr("err.rate") };
-          return { ok: false, message: publicError(raw) === tr("err.public") ? tr("err.signupFail") : publicError(raw) };
+          if (/invalid/i.test(raw) && /email/i.test(raw)) return fail("err.email");
+          if (/already registered|already exists/i.test(raw)) return fail("err.exists");
+          if (/rate limit|over_email_send/i.test(raw)) return fail("err.rate");
+          var shown = publicError(raw);
+          if (shown === tr("err.public")) return fail("err.signupFail");
+          return { ok: false, code: "", message: shown };
         }
         var user = body.user || (body.data && body.data.user);
         var session = body.session || (body.access_token ? body : null);
         if (body.access_token) session = body;
         var identities = user && user.identities;
         if (user && Array.isArray(identities) && identities.length === 0) {
-          return { ok: false, message: tr("err.existsConfirm") };
+          return fail("err.existsConfirm");
         }
-        if (!user) return { ok: false, message: tr("err.signupFail") };
+        if (!user) return fail("err.signupFail");
         if (!session || !session.access_token) {
-          return { ok: true, confirmEmail: true, message: tr("err.confirmEmail") };
+          return { ok: true, confirmEmail: true, code: "err.confirmEmail", message: tr("err.confirmEmail") };
         }
         save(session);
         return updateProfile(session, { name: name, municipality: municipality, accountKind: accountKind }).then(function (warning) {
@@ -251,7 +257,7 @@
         });
       });
     }).catch(function () {
-      return { ok: false, message: tr("err.offline") };
+      return fail("err.offline");
     });
   }
 
@@ -410,7 +416,7 @@
 
   function updatePassword(password) {
     var problem = passwordProblem(password);
-    if (problem) return Promise.resolve({ ok: false, message: problem });
+    if (problem) return Promise.resolve(fail(problem));
     var session = read();
     if (!session) return Promise.resolve({ ok: false, code: "rejected" });
     return fetch(SUPABASE + "/auth/v1/user", {

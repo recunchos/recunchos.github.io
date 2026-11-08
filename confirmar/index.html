@@ -30,11 +30,13 @@
     <h1 data-i18n="confirm.h">Confirmación</h1>
     <p id="estado" role="status" aria-live="polite">Comprobando a ligazón…</p>
     <p data-i18n="confirm.stay">Non se abre a app soa.</p>
-    <form id="clave" hidden>
+    <form id="clave" hidden novalidate>
       <label for="password" data-i18n="confirm.password">Contrasinal novo</label>
-      <input id="password" name="password" type="password" autocomplete="new-password" required>
-      <p class="hint" data-i18n="signup.hint">Mínimo 8 caracteres, cunha letra e un número.</p>
-      <p class="err" id="clave-error" hidden></p>
+      <input id="password" name="password" type="password" autocomplete="new-password" aria-describedby="clave-hint clave-error" aria-invalid="false" required>
+      <label for="password2" data-i18n="confirm.passwordAgain">Repite o contrasinal</label>
+      <input id="password2" name="password2" type="password" autocomplete="new-password" aria-describedby="clave-error" aria-invalid="false" required>
+      <p class="hint" id="clave-hint" data-i18n="signup.hint">Mínimo 8 caracteres, cunha letra e un número.</p>
+      <p class="err" id="clave-error" role="alert" hidden></p>
       <button type="submit" data-i18n="confirm.save">Gardar contrasinal</button>
     </form>
     <div class="links" id="seguir">
