@@ -2,13 +2,19 @@
   var D = window.RecunchosDatos;
   var lista = document.getElementById("lista");
   var estado = document.getElementById("estado");
+  var F = window.RecunchosFiltros;
   var q = document.getElementById("q");
-  var concello = document.getElementById("concello");
+  var nota = document.getElementById("filtro-nota");
   var stage = document.getElementById("stage");
   var explore = document.getElementById("explore");
   var rows = [];
   var scope = "galicia";
   var ready = false;
+  var filters = F.blank();
+  var origin = null;
+  var originKind = "";
+  var sortMode = "recomendados";
+  var more = false;
 
   function tr(key) {
     var I = window.RecunchosIdioma;
@@ -59,13 +65,11 @@
   function shown() {
     var items = pool();
     if (scope !== "galicia") return items;
-    var text = q.value.trim().toLocaleLowerCase("es");
-    var zone = concello.value;
-    return items.filter(function (row) {
-      if (zone && row.municipality !== zone) return false;
-      if (!text) return true;
-      return (row.name + " " + (row.municipality || "")).toLocaleLowerCase("es").indexOf(text) !== -1;
-    });
+    var today = F.madridDate(new Date());
+    filters.text = q.value;
+    items = items.filter(function (row) { return F.matches(row, filters, today, origin); });
+    if (sortMode === "cerca" && origin) return F.sortDistance(items, origin);
+    return F.sortRecommended(items);
   }
 
   function draw() {
@@ -73,7 +77,11 @@
     var noun = scope === "galicia"
       ? tr(items.length === 1 ? "explore.oneFurancho" : "explore.manyFuranchos")
       : tr(items.length === 1 ? "explore.oneCasa" : "explore.manyCasas");
-    estado.textContent = items.length + " " + noun;
+    if (scope === "galicia" && !items.length) {
+      estado.textContent = filters.province === "Ourense" ? tr("explore.emptyOurense") : tr("explore.empty");
+    } else {
+      estado.textContent = items.length + " " + noun;
+    }
     lista.innerHTML = items.map(function (row) {
       var photo = D.photoUrl(row.cover_photo_id);
       var pic = photo
@@ -115,18 +123,127 @@
     }, 80);
   }
 
-  function fillConcellos() {
-    var current = concello.value;
-    var zones = {};
-    rows.filter(D.isGaliciaPlace).forEach(function (row) { if (row.municipality) zones[row.municipality] = true; });
-    concello.innerHTML = '<option value="">' + D.esc(tr("explore.allTowns")) + "</option>";
-    Object.keys(zones).sort(function (a, b) { return a.localeCompare(b, "es"); }).forEach(function (name) {
-      var opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      concello.appendChild(opt);
+  function chip(label, pressed, onPress) {
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "chip";
+    button.textContent = label;
+    button.setAttribute("aria-pressed", pressed ? "true" : "false");
+    button.addEventListener("click", onPress);
+    return button;
+  }
+
+  function paintFilters() {
+    var quick = document.getElementById("chips-quick");
+    var prov = document.getElementById("chips-prov");
+    var zoneBox = document.getElementById("chips-zone");
+    var radio = document.getElementById("chips-radio");
+    var wine = document.getElementById("chips-wine");
+    var food = document.getElementById("chips-food");
+    var price = document.getElementById("chips-price");
+    quick.innerHTML = "";
+    prov.innerHTML = "";
+    zoneBox.innerHTML = "";
+    radio.innerHTML = "";
+    wine.innerHTML = "";
+    food.innerHTML = "";
+    price.innerHTML = "";
+    [
+      ["openNow", "explore.openNow"],
+      ["opensSoon", "explore.opensSoon"],
+      ["inSeason", "explore.inSeason"]
+    ].forEach(function (item) {
+      quick.appendChild(chip(tr(item[1]), filters[item[0]], function () {
+        filters[item[0]] = !filters[item[0]];
+        paintFilters();
+        draw();
+      }));
     });
-    if (zones[current]) concello.value = current;
+    quick.appendChild(chip(tr("explore.near"), originKind === "you", function () { askLocation(); }));
+    quick.appendChild(chip(tr("explore.fromPv"), originKind === "pontevedra", function () { usePontevedra(); }));
+    quick.appendChild(chip(more ? tr("explore.less") : tr("explore.more"), more, function () {
+      more = !more;
+      document.getElementById("more-filters").hidden = !more;
+      paintFilters();
+    }));
+    prov.appendChild(chip(tr("explore.all"), filters.province === "all", function () { filters.province = "all"; filters.zone = "all"; paintFilters(); draw(); }));
+    F.PROVINCES.forEach(function (name) {
+      prov.appendChild(chip(name, filters.province === name, function () {
+        filters.province = name;
+        filters.zone = "all";
+        paintFilters();
+        draw();
+      }));
+    });
+    var galicia = rows.filter(D.isGaliciaPlace).filter(function (row) {
+      return filters.province === "all" || row.province === filters.province;
+    });
+    zoneBox.appendChild(chip(tr("explore.all"), filters.zone === "all", function () { filters.zone = "all"; paintFilters(); draw(); }));
+    F.zonesIn(galicia).forEach(function (name) {
+      zoneBox.appendChild(chip(name, filters.zone === name, function () { filters.zone = name; paintFilters(); draw(); }));
+    });
+    document.getElementById("radio-block").hidden = !origin;
+    document.getElementById("lab-radio").textContent = tr("explore.radius") + (origin ? " " + (originKind === "you" ? tr("explore.near") : "Pontevedra") : "");
+    F.RADIUS.forEach(function (km) {
+      radio.appendChild(chip(km + " km", filters.radiusKm === km, function () { filters.radiusKm = km; paintFilters(); draw(); }));
+    });
+    radio.appendChild(chip(tr("explore.noLimit"), filters.radiusKm == null, function () { filters.radiusKm = null; paintFilters(); draw(); }));
+    wine.appendChild(chip(tr("explore.allWine"), filters.wine === "all", function () { filters.wine = "all"; paintFilters(); draw(); }));
+    F.WINES.forEach(function (name) {
+      wine.appendChild(chip(name, filters.wine === name, function () { filters.wine = name; paintFilters(); draw(); }));
+    });
+    food.appendChild(chip(tr("explore.anyFood"), filters.food === "all", function () { filters.food = "all"; paintFilters(); draw(); }));
+    F.FOODS.forEach(function (name) {
+      food.appendChild(chip(name, filters.food === name, function () { filters.food = name; paintFilters(); draw(); }));
+    });
+    price.appendChild(chip(tr("explore.price1"), filters.maxPrice === 1, function () { filters.maxPrice = filters.maxPrice === 1 ? null : 1; paintFilters(); draw(); }));
+    price.appendChild(chip(tr("explore.price2"), filters.maxPrice === 2, function () { filters.maxPrice = filters.maxPrice === 2 ? null : 2; paintFilters(); draw(); }));
+    price.appendChild(chip(tr("explore.rating4"), filters.minRating === 4, function () { filters.minRating = filters.minRating === 4 ? null : 4; paintFilters(); draw(); }));
+    document.getElementById("orden-recomendados").setAttribute("aria-pressed", sortMode === "recomendados" ? "true" : "false");
+    document.getElementById("orden-cerca").setAttribute("aria-pressed", sortMode === "cerca" ? "true" : "false");
+    if (!origin) nota.hidden = true;
+  }
+
+  function usePontevedra() {
+    origin = F.PONTEVEDRA;
+    originKind = "pontevedra";
+    if (filters.radiusKm == null) filters.radiusKm = 25;
+    nota.hidden = false;
+    nota.textContent = tr("explore.pvNote");
+    paintFilters();
+    draw();
+  }
+
+  function askLocation() {
+    if (!navigator.geolocation) {
+      nota.hidden = false;
+      nota.textContent = tr("explore.noGeo");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      originKind = "you";
+      if (filters.radiusKm == null) filters.radiusKm = 25;
+      nota.hidden = false;
+      nota.textContent = tr("explore.nearNote");
+      paintFilters();
+      draw();
+    }, function () {
+      nota.hidden = false;
+      nota.textContent = tr("explore.noGeo");
+    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+  }
+
+  function resetFilters() {
+    filters = F.blank();
+    origin = null;
+    originKind = "";
+    sortMode = "recomendados";
+    q.value = "";
+    nota.hidden = true;
+    nota.textContent = "";
+    paintFilters();
+    draw();
   }
 
   function paintCommunities() {
@@ -181,7 +298,7 @@
   });
 
   function refreshCopy() {
-    fillConcellos();
+    paintFilters();
     paintCommunities();
     if (scope !== "espana") draw();
   }
@@ -197,5 +314,12 @@
   window.addEventListener("hashchange", function () { setScope(scopeFromHash()); });
   document.addEventListener("recunchos:idioma", refreshCopy);
   q.addEventListener("input", draw);
-  concello.addEventListener("change", draw);
+  document.getElementById("limpiar").addEventListener("click", resetFilters);
+  document.getElementById("orden-recomendados").addEventListener("click", function () { sortMode = "recomendados"; paintFilters(); draw(); });
+  document.getElementById("orden-cerca").addEventListener("click", function () {
+    sortMode = "cerca";
+    if (originKind !== "you") askLocation();
+    else { paintFilters(); draw(); }
+  });
+  paintFilters();
 })();

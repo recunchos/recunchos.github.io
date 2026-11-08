@@ -34,10 +34,31 @@
     <div id="galicia-tools">
       <p class="lead" data-i18n="explore.leadGalicia">Furanchos de Galicia, tamén fóra de tempada. Cada ficha di de que ano son os datos e se seguen sen verificar.</p>
       <label class="skip" for="q" data-i18n="explore.searchLabel">Buscar</label>
-      <input class="search" id="q" type="search" data-i18n-attr="placeholder:explore.searchPh" placeholder="Buscar casa ou concello" autocomplete="off">
-      <div class="filters">
-        <label class="skip" for="concello" data-i18n="explore.townLabel">Concello</label>
-        <select id="concello"><option value="" data-i18n="explore.allTowns">Todos os concellos</option></select>
+      <input class="search" id="q" type="search" data-i18n-attr="placeholder:explore.searchPh" placeholder="Nome, concello, zona…" autocomplete="off">
+      <div id="filtros">
+        <div class="chiprow" id="chips-quick" role="group" data-i18n-attr="aria-label:explore.more" aria-label="Máis filtros"></div>
+        <p class="filter-note" id="filtro-nota" role="status" hidden></p>
+        <p class="filter-label" id="lab-prov" data-i18n="explore.province">Provincia</p>
+        <div class="chiprow" id="chips-prov" role="group" data-i18n-attr="aria-label:explore.province" aria-label="Provincia"></div>
+        <p class="filter-label" id="lab-zone" data-i18n="explore.zone">Zona</p>
+        <div class="chiprow" id="chips-zone" role="group" data-i18n-attr="aria-label:explore.zone" aria-label="Zona"></div>
+        <div id="radio-block" hidden>
+          <p class="filter-label" id="lab-radio" data-i18n="explore.radius">Radio desde</p>
+          <div class="chiprow" id="chips-radio" role="group" data-i18n-attr="aria-label:explore.radius" aria-label="Radio desde"></div>
+        </div>
+        <div id="more-filters" hidden>
+          <p class="filter-label" data-i18n="explore.wine">Viño</p>
+          <div class="chiprow" id="chips-wine" role="group" data-i18n-attr="aria-label:explore.wine" aria-label="Viño"></div>
+          <p class="filter-label" data-i18n="explore.food">Comida</p>
+          <div class="chiprow" id="chips-food" role="group" data-i18n-attr="aria-label:explore.food" aria-label="Comida"></div>
+          <div class="chiprow" id="chips-price" role="group" data-i18n-attr="aria-label:explore.price1" aria-label="Ata €"></div>
+        </div>
+        <p class="filter-label" data-i18n="explore.sort">Ordenar</p>
+        <div class="modes vista" role="group" data-i18n-attr="aria-label:explore.sort" aria-label="Ordenar">
+          <button type="button" id="orden-recomendados" aria-pressed="true" data-i18n="explore.recommended">Recomendados</button>
+          <button type="button" id="orden-cerca" aria-pressed="false" data-i18n="explore.near">Preto de min</button>
+        </div>
+        <button type="button" class="clear-filters" id="limpiar" data-i18n="explore.clear">Limpar filtros</button>
       </div>
       <div class="modes vista" role="group" data-i18n-attr="aria-label:explore.view" aria-label="Vista">
         <button type="button" id="modo-lista" aria-pressed="true" data-i18n="explore.list">Lista</button>
@@ -73,6 +94,7 @@
 <script src="/sesion.js"></script>
 <script src="vendor/leaflet.js"></script>
 <script src="datos.js"></script>
+<script src="filtros.js"></script>
 <script src="lista.js"></script>
 
 </body>
