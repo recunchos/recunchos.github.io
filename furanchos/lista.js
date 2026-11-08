@@ -152,18 +152,13 @@
     return button;
   }
 
-  function gapChip(label, detailKey) {
+  function gapChip(label) {
     var button = document.createElement("button");
     button.type = "button";
     button.className = "chip chip--gap";
     button.textContent = label;
     button.setAttribute("aria-pressed", "false");
     button.setAttribute("aria-disabled", "true");
-    button.setAttribute("aria-describedby", "datos-nota");
-    button.addEventListener("click", function () {
-      nota.hidden = false;
-      nota.textContent = tr(detailKey);
-    });
     return button;
   }
 
@@ -196,16 +191,14 @@
         draw();
       };
     }
-    if (!ready) quick.appendChild(gapChip(tr("explore.openNow"), "explore.hoursGap"));
-    else if (cov.openNow) quick.appendChild(chip(tr("explore.openNow"), filters.openNow, toggle("openNow")));
-    else quick.appendChild(gapChip(tr("explore.openNow"), "explore.hoursGap"));
+    if (!ready || !cov.openNow) quick.appendChild(gapChip(tr("explore.openNow")));
+    else quick.appendChild(chip(tr("explore.openNow"), filters.openNow, toggle("openNow")));
     quick.appendChild(chip(tr("explore.opensSoon"), filters.opensSoon, toggle("opensSoon")));
-    if (!ready) quick.appendChild(gapChip(tr("explore.inSeason"), "explore.missingSeason"));
-    else if (cov.season) quick.appendChild(chip(tr("explore.inSeason"), filters.inSeason, toggle("inSeason")));
-    else quick.appendChild(gapChip(tr("explore.inSeason"), "explore.missingSeason"));
+    if (!ready || !cov.season) quick.appendChild(gapChip(tr("explore.inSeason")));
+    else quick.appendChild(chip(tr("explore.inSeason"), filters.inSeason, toggle("inSeason")));
     quick.appendChild(chip(tr("explore.near"), originKind === "you", function () { askLocation(); }));
     quick.appendChild(chip(tr("explore.fromPv"), originKind === "pontevedra", function () { usePontevedra(); }));
-    quick.appendChild(gapChip(tr("explore.pending"), "explore.pendingGap"));
+    quick.appendChild(gapChip(tr("explore.pending")));
     quick.appendChild(chip(more ? tr("explore.less") : tr("explore.more"), more, function () {
       more = !more;
       document.getElementById("more-filters").hidden = !more;
@@ -245,19 +238,14 @@
       price.appendChild(chip(tr("explore.price1"), filters.maxPrice === 1, function () { filters.maxPrice = filters.maxPrice === 1 ? null : 1; paintFilters(); draw(); }));
       price.appendChild(chip(tr("explore.price2"), filters.maxPrice === 2, function () { filters.maxPrice = filters.maxPrice === 2 ? null : 2; paintFilters(); draw(); }));
     } else {
-      price.appendChild(gapChip(tr("explore.price1"), "explore.priceGap"));
-      price.appendChild(gapChip(tr("explore.price2"), "explore.priceGap"));
+      price.appendChild(gapChip(tr("explore.price1")));
+      price.appendChild(gapChip(tr("explore.price2")));
     }
     if (cov && cov.rating) {
       price.appendChild(chip(tr("explore.rating4"), filters.minRating === 4, function () { filters.minRating = filters.minRating === 4 ? null : 4; paintFilters(); draw(); }));
     } else {
-      price.appendChild(gapChip(tr("explore.rating4"), "explore.ratingGap"));
+      price.appendChild(gapChip(tr("explore.rating4")));
     }
-    var bits = [tr("explore.pendingGap"), tr("explore.priceLevels")];
-    if (cov && !cov.price) bits.push(tr("explore.priceGap"));
-    if (cov && !cov.rating) bits.push(tr("explore.ratingGap"));
-    if (cov && !cov.openNow) bits.push(tr("explore.hoursGap"));
-    document.getElementById("datos-nota").textContent = ready ? bits.filter(Boolean).join(" ") : "";
     document.getElementById("orden-recomendados").setAttribute("aria-pressed", sortMode === "recomendados" ? "true" : "false");
     document.getElementById("orden-cerca").setAttribute("aria-pressed", sortMode === "cerca" ? "true" : "false");
     if (!origin) nota.hidden = true;
